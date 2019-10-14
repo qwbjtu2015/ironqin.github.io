@@ -238,6 +238,7 @@ GEM
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
     unicode-display_width (1.6.0)
+    wdm (0.1.1)
 
 PLATFORMS
   x64-mingw32
@@ -248,6 +249,7 @@ DEPENDENCIES
   github-pages-health-check (~> 1.16.1)
   jekyll (~> 3.8.5)
   jekyll-sitemap (~> 1.2.0)
+  wdm (~> 0.1.0)
 
 BUNDLED WITH
    2.0.2
