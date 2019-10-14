@@ -11,3 +11,5 @@ gem "activesupport", "~> 4.2.11.1"
 gem "github-pages-health-check", "~> 1.16.1"
 gem "github-pages", "~> 201", group: :jekyll_plugins
 gem "wdm", "~> 0.1.0"
+gem "jekyll-github-metadata", "2.12.1"
+gem "jekyll-octicons"
