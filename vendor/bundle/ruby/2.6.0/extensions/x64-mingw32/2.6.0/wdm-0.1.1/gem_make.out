@@ -1,0 +1,12 @@
+current directory: D:/GitHub/qwbjtu2015.github.io/vendor/bundle/ruby/2.6.0/gems/wdm-0.1.1/ext/wdm
+D:/Ruby/Ruby26-x64/bin/ruby.exe -I D:/Ruby/Ruby26-x64/lib/ruby/2.6.0 -r ./siteconf20191014-28844-1e8gj7r.rb extconf.rb
+checking for -lkernel32... no
+
+current directory: D:/GitHub/qwbjtu2015.github.io/vendor/bundle/ruby/2.6.0/gems/wdm-0.1.1/ext/wdm
+make "DESTDIR=" clean
+
+current directory: D:/GitHub/qwbjtu2015.github.io/vendor/bundle/ruby/2.6.0/gems/wdm-0.1.1/ext/wdm
+make "DESTDIR="
+
+current directory: D:/GitHub/qwbjtu2015.github.io/vendor/bundle/ruby/2.6.0/gems/wdm-0.1.1/ext/wdm
+make "DESTDIR=" install

@@ -1,3 +1,6 @@
-.jekyll-cache/
-vendor/bundle
-.bundle/
+_site/
+.sass-cache/
+*.DS_Store
+.idea
+*.swp
+.Trashes
