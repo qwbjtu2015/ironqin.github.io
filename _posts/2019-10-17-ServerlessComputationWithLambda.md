@@ -1,4 +1,11 @@
-# Serverless Computation With OpenLambda
+---
+layout: post
+title: "Serverless Computation With OpenLambda"
+date: 2019-10-17 
+description: "OpenLambda论文翻译"
+tag: 无服务器计算
+
+---  
 
 > 文章提出了一个全新的开源平台OpenLambda，针对无服务器计算中越来越多的模型，用于构建下一代web服务和应用。文章介绍了无服务器计算的关键部分并列举了在此类系统设计和实现中必须要解决的一系列问题。为了更好地促进无服务器应用的构建，文章对于当前的web应用也做了简要研究。
 
@@ -38,7 +45,7 @@ Lambda模型允许开发者指定对应于不同事件的函数。我们这里�
 
 Lambda模型的一个主要优势在于当负载突然增加时可以快速自动扩展worker节点数量的能力。为了证实这一点，我们比较了AWS Lambda和基于容器的服务器平台[AWS Elastic Beanstalk](https://aws.amazon.com/cn/elasticbeanstalk/?nc2=type_a)（下文简称Elastic BS）。两个平台上，我们同时运行相同的标准一分钟：工作负载维持100个未完成的RPC请求，并且每个RPC handler持续200ms。
 
-[Fig2 响应时间。 该CDF显示从模拟负载突发到Elastic BS应用程序和AWS Lambda应用程序的响应时间度量](/images/posts/paper/openLambda-fig2.png)
+![Fig2 *响应时间* 该CDF显示从模拟负载突发到Elastic BS应用程序和AWS Lambda应用程序的响应时间度量](/images/posts/paper/openLambda-fig2.png)
 
 &emsp;&emsp;上图2显示：使用AWS Lambda的RPC调用平均响应时间仅1.6秒，然而Elastic BS经常需要花费20秒左右。探究其中的原因，我们发现AWS可以在1.6秒之内启动100个worker实例来同时处理100个请求，但是Elastic BS则都是通过一个实例来处理这些请求，每个请求都需要前面的请求处理结束后才能进行处理，也就是100\*200ms=20s。
 
@@ -46,9 +53,13 @@ Lambda模型的一个主要优势在于当负载突然增加时可以快速自�
 
 ## 3 Lambda工作负载
 
+&emsp;&emsp;到此为止，我们还没接触到Lambda的工作负载，它作为web服务（如Gmail或Facebook）的主要部分，目前都是在无服务器模型出现之前构建的。但通过分析这些现存的服务我们可以李阿娇未来的工作负载如何在Lambda环境上施加压力。具体地，我们分析现存的基于RPC的C/S模式的应用：Google Gmail。Gmail使用客户端的JavaScript通过ROC获取动态内容。JS RPC库（如AJAX）基于XHR接口，通过HTTP协议向后端发送GET或POST请求，参数和返回值被编码在URL或消息体（如JSON）中。我们使用Chrome扩展工具跟踪这些RPC调用。我们的工作负载包括刷新Gmail收件箱页面(浏览器缓存应该是存在的)。
 
+![Fig3 *Google Gmail* 黑线代表RPC消息，灰线代表其他消息，线结束代表着请求和响应时间。上图按照GET和POST请求分为了上下两组](/images/posts/paper/openLambda-fig3.png)
 
 ## 4 研究内容
+
+&emsp;&emsp;现在我们探索在无服务器计算领域的一些研究热点。
 
 ### 4.1 执行引擎
 
