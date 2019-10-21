@@ -33,7 +33,7 @@ tags: 无服务器计算 论文
 
 ### 2.1 编程模型
 
-Lambda模型允许开发者指定对应于不同事件的函数。我们这里讨论的事件是一个来自web应用的RPC调用且上传的函数是一个RPC handler的情况。开发者选择一个运行时环境（如Python7），然后上传相关代码，并指定它要处理的事件的函数名称。开发者就可以将一个使用独立的AWS网关服务的URL与Lambda关联起来。客户端代码则可以通过向这个URL发起请求来发起RPC调用（例如JavaScript可以通过AJAX发起POST请求）。
+&emsp;&emsp;Lambda模型允许开发者指定对应于不同事件的函数。我们这里讨论的事件是一个来自web应用的RPC调用且上传的函数是一个RPC handler的情况。开发者选择一个运行时环境（如Python7），然后上传相关代码，并指定它要处理的事件的函数名称。开发者就可以将一个使用独立的AWS网关服务的URL与Lambda关联起来。客户端代码则可以通过向这个URL发起请求来发起RPC调用（例如JavaScript可以通过AJAX发起POST请求）。
 
 &emsp;&emsp;Handler可以在任一worker节点上运行，在AWS上，一个新的worker节点的启动时间为1-2秒。一旦有节点宕机，负载均衡器可以马上在一个新worker节点上启动Lambda handler来处理RPC调用的请求，而不会产生过多延迟。然而，对特定Lambda的请求一般会发往相同的worker节点来避免沙箱重新初始化所产生的时间消耗。
 
@@ -43,7 +43,7 @@ Lambda模型允许开发者指定对应于不同事件的函数。我们这里�
 
 ### 2.2 Lambda优势
 
-Lambda模型的一个主要优势在于当负载突然增加时可以快速自动扩展worker节点数量的能力。为了证实这一点，我们比较了AWS Lambda和基于容器的服务器平台[AWS Elastic Beanstalk](https://aws.amazon.com/cn/elasticbeanstalk/?nc2=type_a)（下文简称Elastic BS）。两个平台上，我们同时运行相同的标准一分钟：工作负载维持100个未完成的RPC请求，并且每个RPC handler持续200ms。
+&emsp;&emsp;Lambda模型的一个主要优势在于当负载突然增加时可以快速自动扩展worker节点数量的能力。为了证实这一点，我们比较了AWS Lambda和基于容器的服务器平台[AWS Elastic Beanstalk](https://aws.amazon.com/cn/elasticbeanstalk/?nc2=type_a)（下文简称Elastic BS）。两个平台上，我们同时运行相同的标准一分钟：工作负载维持100个未完成的RPC请求，并且每个RPC handler持续200ms。
 
 ![Fig2 **响应时间** 该CDF显示从模拟负载突发到Elastic BS应用程序和AWS Lambda应用程序的响应时间度量](/images/posts/paper/openLambda-fig2.png "Fig2 **响应时间** 该CDF显示从模拟负载突发到Elastic BS应用程序和AWS Lambda应用程序的响应时间度量")
 
