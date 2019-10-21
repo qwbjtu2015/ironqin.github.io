@@ -21,7 +21,7 @@ tags: 无服务器计算 论文
 
 &emsp;&emsp;与传统的基于服务器的方法相比，Lambda模型具有许多优势。来自不同用户的Lambda handler(handler是Lambda中的函数接口）可以共享云服务提供商管理的服务器池，因此开发者无需关心服务器管理。Handler一般使用JavaScript或Python语言编写；通过在不同函数间共享运行时环境，针对特定应用的代码就会比较小，所以将这些handler代码发往集群中的其他worker节点成本也是很小的。最后，应用程序可以实现在不启动新服务器的前提下快速扩展。Lambda模型代表了应用程序间共享的最高层次，从硬件共享（虚拟机）到操作系统共享（容器）最终到运行时环境共享（Lambda）。
 
-![Fig1 共享层级的革新](/images/posts/paper/openLambda-fig1.png)
+![Fig1 共享层级的革新](/images/posts/paper/openLambda-fig1.png "Fig1 共享层级的变革")
 
 &emsp;&emsp;论文中，我们提出了Lambda模型并讨论了相关的研究挑战。Lambda执行引擎必须安全有效的隔离handler。Handler是无状态的，因此在Lambda和数据库服务的集成方向有许多机会。Lambda负载均衡器必须根据session和代码以及数据位置选择出低延迟的方案。此外文章也进一步探索了一些新挑战，如即时编译（JIT）、软件包管理、web session、经济成本以及可移植性。
 
@@ -45,7 +45,7 @@ Lambda模型允许开发者指定对应于不同事件的函数。我们这里�
 
 Lambda模型的一个主要优势在于当负载突然增加时可以快速自动扩展worker节点数量的能力。为了证实这一点，我们比较了AWS Lambda和基于容器的服务器平台[AWS Elastic Beanstalk](https://aws.amazon.com/cn/elasticbeanstalk/?nc2=type_a)（下文简称Elastic BS）。两个平台上，我们同时运行相同的标准一分钟：工作负载维持100个未完成的RPC请求，并且每个RPC handler持续200ms。
 
-![Fig2 **响应时间** 该CDF显示从模拟负载突发到Elastic BS应用程序和AWS Lambda应用程序的响应时间度量](/images/posts/paper/openLambda-fig2.png)
+![Fig2 **响应时间** 该CDF显示从模拟负载突发到Elastic BS应用程序和AWS Lambda应用程序的响应时间度量](/images/posts/paper/openLambda-fig2.png "Fig2 **响应时间** 该CDF显示从模拟负载突发到Elastic BS应用程序和AWS Lambda应用程序的响应时间度量")
 
 &emsp;&emsp;上图2显示：使用AWS Lambda的RPC调用平均响应时间仅1.6秒，然而Elastic BS经常需要花费20秒左右。探究其中的原因，我们发现AWS可以在1.6秒之内启动100个worker实例来同时处理100个请求，但是Elastic BS则都是通过一个实例来处理这些请求，每个请求都需要前面的请求处理结束后才能进行处理，也就是100\*200ms=20s。
 
@@ -55,7 +55,7 @@ Lambda模型的一个主要优势在于当负载突然增加时可以快速自�
 
 &emsp;&emsp;到此为止，我们还没接触到Lambda的工作负载，它作为web服务（如Gmail或Facebook）的主要部分，目前都是在无服务器模型出现之前构建的。但通过分析这些现存的服务我们可以李阿娇未来的工作负载如何在Lambda环境上施加压力。具体地，我们分析现存的基于RPC的C/S模式的应用：Google Gmail。Gmail使用客户端的JavaScript通过ROC获取动态内容。JS RPC库（如AJAX）基于XHR接口，通过HTTP协议向后端发送GET或POST请求，参数和返回值被编码在URL或消息体（如JSON）中。我们使用Chrome扩展工具跟踪这些RPC调用。我们的工作负载包括刷新Gmail收件箱页面(浏览器缓存应该是存在的)。
 
-![Fig3 **Google Gmail** 黑线代表RPC消息，灰线代表其他消息，线结束代表着请求和响应时间。上图按照GET和POST请求分为了上下两组](/images/posts/paper/openLambda-fig3.png)
+![Fig3 **Google Gmail** 黑线代表RPC消息，灰线代表其他消息，线结束代表着请求和响应时间。上图按照GET和POST请求分为了上下两组](/images/posts/paper/openLambda-fig3.png "Fig3 **Google Gmail** 黑线代表RPC消息，灰线代表其他消息，线结束代表着请求和响应时间。上图按照GET和POST请求分为了上下两组")
 
 &emsp;&emsp;上图3展示了Gmail的网络IO随时间变化图，分为GET和POST请求两个部分，Gmail一般RPC调用使用POST方法，其他请求使用GET，RPC调用在所有请求中占比32%左右，且耗费时间（平均92ms）长于其他请求（平均18ms）。我们同时发现在RPC请求中又分为两大类：非常短的和非常长的。
 
@@ -75,17 +75,17 @@ Lambda模型的一个主要优势在于当负载突然增加时可以快速自�
 
 &emsp;&emsp;为了摊容器启动开销，在可行的情况下AWS Lambda会使用同一个容器运行多个handler。遗憾的是，即使这样优化后，Lambda在低请求量场景下仍然要比容器慢很多。如下图4展示了除了是一个稳定的低负载而不是高负载外与2.2节相同的实验配置的结果。当负载较小时，AWS Lambda的延迟要比Elastic BS差10倍之多。如果Lambda相与虚拟机和容器相竞争，则必须减少它的基础执行时间。
 
-![Fig4 **容器 vs. Lambda: 时延** 曲线展示了在低负载状态下AWS Lambda和运行在容器中的Elastic BS的时延CDF图像。](/images/posts/paper/openLambda-fig4.png)
+![Fig4 **容器 vs. Lambda: 时延** 曲线展示了在低负载状态下AWS Lambda和运行在容器中的Elastic BS的时延CDF图像。](/images/posts/paper/openLambda-fig4.png "**容器 vs. Lambda: 时延** 曲线展示了在低负载状态下AWS Lambda和运行在容器中的Elastic BS的时延CDF图像。")
 
 &emsp;&emsp;本节中我们探索在容器中运行Lambda的一些基本权衡。特别是，容器在`running`状态才能处理请求，当没有请求时，容器处于`paused`或`stopped`状态。
 
 &emsp;&emsp;如下图5比较了`unpausing`（从`paused`到`running`）、重启（从`stopped`到`running`）以及启动新容器三种情况的时间延迟。重启和启动新容器都花费数百毫秒，而`unpausing`仅花费约1毫秒。
 
-![Fig5 **状态准备延迟** 曲线展示了三种重启转换的延迟](/images/posts/paper/openLambda-fig5.png)
+![Fig5 **状态准备延迟** 曲线展示了三种重启转换的延迟](/images/posts/paper/openLambda-fig5.png "Fig5 **状态准备延迟** 曲线展示了三种重启转换的延迟")
 
 &emsp;&emsp;遗憾的是，保持容器在`paused`状态会有较高的内存开销。下图6展示了相应内存大小情况下我们可以运行的处于`paused`或`running`状态的容器的最大数量。每个数据点意味着我们不能再启动新的容器。可以发现，内存是主要瓶颈（我们认为网桥瓶颈容易解决），而且`paused`状态和`running`状态的容器具有相同的内存开销。因此在将处于非运行状态的容器转为`paused`还是`stopped`是一个艰难的权衡。减少`paused`状态的内存开销和减少`stopped`状态的重启开销都是有趣的研究挑战。
 
-![Fig6 **容器密度** 对应内存大小情况下机器可以运行的最大容器数量](/images/posts/paper/openLambda-fig6.png)
+![Fig6 **容器密度** 对应内存大小情况下机器可以运行的最大容器数量](/images/posts/paper/openLambda-fig6.png "Fig6 **容器密度** 对应内存大小情况下机器可以运行的最大容器数量")
 
 ### 4.2 编译型语言
 
