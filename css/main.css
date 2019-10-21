@@ -63,7 +63,7 @@ html {
 
 body {
   font-family: "ff-tisa-web-pro-1", "ff-tisa-web-pro-2", "Lucida Grande", "Hiragino Sans GB", "Hiragino Sans GB W3", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
-  font-size: 14px;
+  font-size: 18px;
   color: #333;
   -webkit-font-smoothing: antialiased; }
 
@@ -115,6 +115,7 @@ h1 {
 
 h2 {
   font-size: 1.5em; 
+  font-weight: bold;
   /*background:#B9D3EE;*/
   /*text-align: center;*/
 }
