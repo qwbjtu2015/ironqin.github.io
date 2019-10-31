@@ -11,7 +11,7 @@ tags: 机器学习
 
 &emsp;&emsp;RNN常被用于Seq2Seq问题中，用于提取有时间序列的特征，它的两种变体LSTM和GRU则是解决了梯度传播中梯度消失和梯度爆炸的问题，但由于RNN本身的特性，它在计算时必须串行进行，因为每一步的计算都依赖于前一个单元的隐层输出，因此其训练速度较慢，难以加速。
 
-![Fig1 ](/images/paper/transformer-fig1.png)
+![Fig1 ](/images/posts/paper/transformer-fig1.png)
 
 &emsp;&emsp;基于RNN难以并行化的缺点以及之前提出的基于Attention的做法，Google更进一步，将整个RNN由Transformer结构替代,完全摒弃了RNN的结构，那么Transformer的结构是什么样的呢？它又是如何实现并行化的呢？
 
