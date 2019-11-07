@@ -36,7 +36,7 @@ tags: 机器学习
 
 ![Fig4 ](/images/posts/paper/transformer-fig4.png)
 
-&emsp;&emsp;这里的三个矩阵W都是通过网络学习得到，如下图所示，前一层为ai，后一层为$$q_i$$，那么他们之间的权重这是矩阵Wq。
+&emsp;&emsp;这里的三个矩阵W都是通过网络学习得到，如下图所示，前一层为ai，后一层为$q_i$，那么他们之间的权重这是矩阵Wq。
 
 ![Fig5 ](/images/posts/paper/transformer-fig5.png)
 
