@@ -28,15 +28,22 @@ tags: 机器学习
 
 ![Fig3 ](/images/posts/paper/transformer-fig3.png)
 
-&emsp;&emsp;上图中我们可以把输入看做一个短句子，如`机器学习`，那么x1则是`机`对应的one-hot向量，同理，其它几个xi是另外三个字对应的one-hot向量。那么ai向量则是每个xi词汇对应的词向量，通过W词向量矩阵与xi向量相乘获得，维度多在50-300左右。W词向量矩阵通过上下文学习预训练所得，这里不展开讲。
+&emsp;&emsp;上图中我们可以把输入看做一个短句子，如`机器学习`，那么x1则是`机`对应的one-hot向量，同理，其它几个xi是另外三个字对应的one-hot向量。那么$a_i$向量则是每个$x_i$词汇对应的词向量，通过W词向量矩阵与$x_i$向量相乘获得，维度多在50-300左右。W词向量矩阵通过上下文学习预训练所得，这里不展开讲。
 
 > 注：此处，我们为了表示方便，将一个字对应一个输入，在实际使用中当然也可以将一个词对应为一个输入，如果以字为输入，那么xi向量的维度则是字的数量【汉字常用字大概为4000左右】，如果以词为输入，则xi向量的长度则是词表的大小。
 
-&emsp;&emsp;之后，每个词向量ai会分别与三个矩阵Wq/Wk和Wv相乘，分别得到三个向量qi/ki/vi.
+&emsp;&emsp;之后，每个词向量ai会分别与三个矩阵Wq/Wk和Wv相乘，分别得到三个向量$q_i$/$k_i$/$v_i$.
+
+<center>$q: query(to match others)$</center>
+<center>$q^i = W^qa^i$</center>
+<center>$k: key(to be matched)$</center>
+<center>$k^i = W^ka^i$</center>
+<center>$v: information to be extracted$</center>
+<center>$v^i = W^va^i$</center>
 
 ![Fig4 ](/images/posts/paper/transformer-fig4.png)
 
-&emsp;&emsp;这里的三个矩阵W都是通过网络学习得到，如下图所示，前一层为ai，后一层为$q_i$，那么他们之间的权重这是矩阵Wq。
+&emsp;&emsp;这里的三个矩阵W都是通过网络学习得到，如下图所示，前一层为$a_i$，后一层为$q_i$，那么他们之间的权重这是矩阵$W_q$。
 
 ![Fig5 ](/images/posts/paper/transformer-fig5.png)
 
@@ -44,31 +51,31 @@ tags: 机器学习
 
 ![Fig6 ](/images/posts/paper/transformer-fig6.png)
 
-&emsp;&emsp;如上图所示，要计算x1词与其他词之间的attention，则通过x1的查询向量q1分别与自己和其他词的k向量做点积，这样则得到了四个权重。
+&emsp;&emsp;如上图所示，要计算x1词与其他词之间的attention，则通过$x_1$的查询向量$q_1$分别与自己和其他词的k向量做点积，这样则得到了四个权重。
 
-gongshi
+<center>$\alpha_{1,i} = \frac{q_1\cdot k_i}{\sqrt{d}}$</center>
 
 &emsp;&emsp;上式中d是q、k的维度，论文中为64，在这里除以根号d的目的在于防止q和k的维度对于该值的影响，因为q与v的点积随着他们的维度增加会变大，因此除以维度来抵消影响。
 
 ![Fig7 ](/images/posts/paper/transformer-fig7.png)
 
-&emsp;&emsp;然后对得到的α向量进行softmax，使得他们的和为1，那么每一个值则对应了x1应该关注的关注度，因此a1的输出b1则是α向量与vi的加权求和：
+&emsp;&emsp;然后对得到的α向量进行softmax，使得他们的和为1，那么每一个值则对应了$x_1$应该关注的关注度，因此$a_1$的输出$b_1$则是α向量与$v_i$的加权求和：
 
-gongshi
+<center>$b_1 = \sum_{i=1}^{4}\alpha_{1,i}\ast v_i$</center>
 
-&emsp;&emsp;其余b2/b3/b4同样进行计算。
+&emsp;&emsp;其余$b_2$/$b_3$/$b_4$同样进行计算。
 
 ![Fig8 ](/images/posts/paper/transformer-fig8.png)
 
-&emsp;&emsp;回到上面这张图，我们就解释完了Self-Attention中从输入ai到输出bi的全部计算过程，简单回顾就是：先通过三个矩阵与ai相乘得到对应ai的三个向量qi，ki，vi，然后通过qi分别与所有ki向量点积得到一组attention向量，归一化后再与vi加权求和，得到输出bi向量，这个过程中每个bi之间的计算没有依赖关系，因此可以通过矩阵计算一同完成，而GPU对于矩阵运算的加速非常擅长，因此可以大大提升计算速度。
+&emsp;&emsp;回到上面这张图，我们就解释完了Self-Attention中从输入$a_i$到输出$b_i$的全部计算过程，简单回顾就是：先通过三个矩阵与$a_i$相乘得到对应$a_i$的三个向量$q_i$，$k_i$，$v_i$，然后通过$q_i$分别与所有$k_i$向量点积得到一组attention向量，归一化后再与$v_i$加权求和，得到输出$b_i$向量，这个过程中每个$b_i$之间的计算没有依赖关系，因此可以通过矩阵计算一同完成，而GPU对于矩阵运算的加速非常擅长，因此可以大大提升计算速度。
 
 ### 1.2 Multi-Head Attention
 
-&emsp;&emsp;上面讲的Self-Attention是是单个head的，他们有一组Wq、Wk和Wv，那么multi-head我们可以理解为多组矩阵Wq，Wk和Wv，下图展示了2个head的情况：
+&emsp;&emsp;上面讲的Self-Attention是是单个head的，他们有一组$W_q$、$W_k$和$W_v$，那么multi-head我们可以理解为多组矩阵$W_q$、$W_k$和$W_v$，下图展示了2个head的情况：
 
 ![Fig9 ](/images/posts/paper/transformer-fig9.png)
 
-&emsp;&emsp;每个输入ai，通过上述计算可以得到两个bi，两个bi进行concat，然后可以再乘上一个权重矩阵得到与qi同维度的向量，这个权重矩阵和上述过程中Wq一样，也是通过网络学习得到。
+&emsp;&emsp;每个输入$a_i$，通过上述计算可以得到两个$b_i$，两个$b_i$进行concat，然后可以再乘上一个权重矩阵得到与$q_i$同维度的向量，这个权重矩阵和上述过程中$W_q$一样，也是通过网络学习得到。
 
 &emsp;&emsp;那么为什么要使用多个head呢？每个head又有什么不同呢？
 
