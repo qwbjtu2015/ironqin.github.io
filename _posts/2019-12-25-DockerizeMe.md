@@ -52,32 +52,48 @@ tags: paper
 
 ## 4 知识获取
 
-&emsp;&emsp;DockerizeMe使用离线知识库来正确推断目标脚本的依赖关系。这个知识库包含包、它们的版本和资源，以及它们之间的关系。它是通过对库中的已知包应用静态和动态分析来构建的。输入输出数据集[12]。静态分析枚举包的已知资源以供以后检索，而动态分析则收集关于传递依赖项的信息。公共Python项目中依赖项的关联规则挖掘利用了开发人员生成的系统级传递依赖项的知识。现在我们详细讨论每种技术。
+&emsp;&emsp;DockerizeMe使用离线知识库来正确推断目标脚本的依赖关系。这个知识库包含包、它们的版本和资源，以及它们之间的关系。它是通过对Libraries.io[12]数据集中的已知包应用静态和动态分析来构建的。静态分析枚举包的已知资源以供以后检索，而动态分析则收集关于传递依赖项的信息。公共Python项目中依赖项的关联规则挖掘利用了开发人员生成的系统级传递依赖项的知识。现在我们详细讨论每种技术。
 
 ***A. 发现包资源***
 
 &emsp;&emsp;推断哪些包对应于脚本使用的代码资源是一项具有挑战性的任务。根据[6]的报告，许多资源的名称与它们所属的包不同。开发人员通常很难确定使用哪个包。
 
+&emsp;&emsp;为了更好地为我们的推理过程提供信息，我们分析了PyPI上的按照他们在Libraries.io[12]数据集上的SourceRank排名前10000的Python包。包是根据source rank来选择的，以包含最常用的库，因为流行的库可以影响包生态系统的大部分，并且生态系统的大小不允许对其进行全面分析[13]。如果安装成功，我们将把发行版的顶级资源记录在top_level.txt中。例如，我们从Python包biopython中提取了Bio和BioSQL资源。88%的测试包安装成功。
 
-&emsp;&emsp;为了更好地为我们的推理过程提供信息，我们分析了PyPI上的前10000个Python包，这些包基于它们在库中的源代码级别。输入输出数据集[12]。包是根据源级别来选择的，以包含最常用的库，因为流行的库可以影响包生态系统的大部分，并且生态系统的大小不允许对[13]进行全面分析。如果安装成功，我们将把发行版的顶级资源记录在top_level.txt中。例如，我们从Python包biopython中提取了Bio和BioSQL资源。88%的测试包安装成功。
-&emsp;&emsp;由于缺少依赖项或其他未知的配置，有些包可能无法安装。当这种情况发生时，我们尝试手动下载和解析包发行版。使用选项——no-cache-dir和——no-deps下载所有包。如果包在PyPI上提供了一个wheel (Python二进制格式的发行版)，我们下载它时使用的是——only-binary=:all:。如果这个包在PyPI上没有轮子，但是有一个源代码发行版，我们下载它的时候使用了——no-binary=:all:。对于源发行版，我们随后尝试使用选项no-deps构建一个轮盘发行版。如果我们成功地为包下载或构建了一个轮子，那么我们将进行解析通过查找和读取轮子的top_level来获得包的顶级资源。txt文件。这在三分之一的包中是成功的。
+&emsp;&emsp;由于缺少依赖项或其他未知的配置，有些包可能无法安装。当这种情况发生时，我们尝试手动下载和解析包的发行版。我们可以使用pip命令以及可选项`--no-cache-dir`和`--no-deps`下载所有包。如果包在PyPI上提供了一个wheel文件 (Python二进制格式的发行版)，我们下载它时使用的是`--only-binary=:all:`。如果这个包在PyPI上没有wheel文件，但是有一个源代码发行版，我们下载它的时候使用`--no-binary=:all:`。对于源代码发行版，我们随后尝试使用选项`--no-deps`构建一个wheel发行版。如果我们成功地为包下载或构建了一个wheel，那么我们将通过查找和读取wheel文件的top_level.txt来进行解析获得包的顶级资源。这在三分之一的包中是成功的。
 
 ***B. 动态分析***
 
-&emsp;&emsp;有些包可能没有正确地列出它们的依赖项，从而阻止pip在安装期间自动处理解析。我们使用SourceRank从库中获得的10,000个包，通过执行动态分析来解决这个问题。输入输出数据。首先，我们尝试使用pip install <package>安装每个包。如果安装成功，则解析顶级资源并尝试导入每个资源。安装/导入过程的任何错误输出都会被记录下来，在出现错误时，我们将解析下列模式实例的输出，这些模式表示依赖于某个不存在的Python包。
- * no module named <name>.
- * pip install <name>.
- * cannot find <name>.
- * cannot import name <name>.
+&emsp;&emsp;有些包可能没有正确地列出它们的依赖项，从而阻止pip在安装期间自动处理解析。我们使用SourceRank从Libraries.io中获得的10,000个包，通过执行动态分析来解决这个问题。首先，我们尝试使用`pip install <package>`安装每个包。如果安装成功，则解析顶级资源并尝试导入每个资源。安装/导入过程的任何错误输出都会被记录下来，在出现错误时，我们将解析下列模式实例的输出，这些模式表示依赖于某个不存在的Python包。
+ * `no module named <name>`.
+ * `pip install <name>`.
+ * `cannot find <name>`.
+ * `cannot import name <name>`.
 
-&emsp;&emsp;例如，尝试安装Python包PyHum([14])会得到以下输出:根据输出，我们的动态分析过程将一个依赖记录输入到知识库中，这表明PyHum需要numpy。
+&emsp;&emsp;例如，尝试安装Python包PyHum([14])会得到以下输出:`Import Error: No moudle named numpy. Please install numpy first, it is needed before installing PyHum.`
+&emsp;&emsp;根据输出，我们的动态分析过程将一个PyHum依赖于numpy的依赖记录输入到知识库。
 
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
+***C. 关联规则***
+
+&emsp;&emsp;如果安装失败并且找不到或构建不了wheel，静态和动态分析就不能提供关于包的有意义的信息。动态分析也可能由于非标准的错误消息或对C库中未知头文件的引用而无法找到包的依赖项。在其他情况下，依赖项可能是可选的，或者仅与另一个包一起需要。这是一个使用RavenSentry进行错误日志记录的简单Flask应用。
+
+![Fig2](/images/posts/paper/DockerizeMe-fig2.png "Fig2 简单Flask例子")
+
+&emsp;&emsp;在安装了Flask和Raven之后，运行这个Flask的app会导致`ImportError: No module named blinker`。该系统还必须具有blinker，一个对象信令库，用于Raven与Flask正确通信。
+
+&emsp;&emsp;DockerizeMe通过使用从现有Python环境配置中学习到的规则来扩展其知识库，从而解决了这些问题。我们的目标是一个包含apt和pip安装命令的Dockerfile的公共GitHub仓库。目标仓库的列表是从谷歌BigQuery中挖掘出来的。
+&emsp;&emsp; *a)从Dockerfile中提取项目：*我们检查每个repo的Dockerfile，查找`exec`和`shell`格式的所有`RUN`命令。命令被规范化以删除新行和转义字符。如果该命令是exec格式的，则它还将被转换为单个命令字符串。如果一个命令字符串包含一个以上的命令，由&&、||或;分隔，它被分割成一个单独命令的列表。
+
+&emsp;&emsp;所有以“-”开头的标记都被假定为命令标志并被忽略。在其余的词语中，以apt-get install开头的命令被解析为apt包，而以pip install开头的命令被解析为pip包。此外，通过使用apt-cache程序检查已知apt包的列表，可以验证已解析的apt包是否存在。解析过的pip包通过检查PyPI来验证是否存在。
+
+&emsp;&emsp;*b)从requirements文件中提取项目:*一些项目从requirements文件中安装Python依赖项。典型的命名约定是`requirements.txt`或`requirements-<env>.txt`，其中`env`可能是一个类似于生产或开发的环境。我们寻找并解析所有满足任一命名约定的requirements文件，使用PEP 508指定的requirements格式的最常见子集提取项目需求文件中的所有包说明符。任何发现的包都将被验证是否存在于PyPI上，如果存在，则包括在pip包集合中。
+
+&emsp;&emsp;*c)事务格式:*将每个项目解析后的依赖项转换为关联规则挖掘的中间事务格式。每个项目都被认为是一个单独的事务，它的包依赖关系被写为一个空格分隔的行。包名以包管理系统的名称(apt_或pip_)作为前缀。这既可以防止名称冲突，又可以在生成关联规则时保留系统信息。
+例如，下面的Dockerfile被解析为事务：`apt_libmemcached-dev pip_pylibmc`
+
+![Fig3](/images/posts/paper/DockerizeMe-fig3.png "Fig3 Dockerfile转换示例")
+
+&emsp;&emsp;*d)规则生成:*关联规则由事务数据生成，使用来自R语言`arules`包的apriori算法实现。 我们使用默认的最小置信水平0.8。规则限制为最大长度为2的规则，即在前件中有一个包，在后件中有一个包。最小支持被选择来限制在事务数据中至少有三个实例的项集。选择支持级别是为了过滤随机发生的项目集。
 
 ## 5 知识表示
 
