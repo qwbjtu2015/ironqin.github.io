@@ -34,14 +34,12 @@ tags: 机器学习
 
 &emsp;&emsp;之后，每个词向量ai会分别与三个矩阵Wq/Wk和Wv相乘，分别得到三个向量$q_i$/$k_i$/$v_i$.
 
-<center>$q: query(to match others)$</center>
+<center>q: query(to match others)</center>
 <center>$q^i = W^qa^i$</center>
-<center>$k: key(to be matched)$</center>
+<center>k: key(to be matched)</center>
 <center>$k^i = W^ka^i$</center>
-<center>$v: information to be extracted$</center>
+<center>v: information to be extracted</center>
 <center>$v^i = W^va^i$</center>
-
-![Fig4 ](/images/posts/paper/transformer-fig4.png)
 
 &emsp;&emsp;这里的三个矩阵W都是通过网络学习得到，如下图所示，前一层为$a_i$，后一层为$q_i$，那么他们之间的权重这是矩阵$W_q$。
 
