@@ -6,10 +6,8 @@ description: "DockerizeMe"
 tags: 依赖分析
 
 ---  
-
-> &emsp;&emsp;像Stack Overflow和GitHub的gist系统这样的平台，通过展示用于说明特定任务的代码片段，促进思想和编程技术的共享。Python是一种流行且快速发展的编程语言，在这两个站点上都有大量的使用，Stack Overflow上有近100万个问题，GitHub上有40万个公共仓库。不幸的是，通过这些站点共享的Python示例代码中有75%不能直接执行。当在干净的环境中运行时，超过50%的公共Python仓库会由于库的导入错误而失败。
-
-> &emsp;&emsp;我们提出了DockerizeMe，这是一种用于推断执行Python代码片段所需的依赖库的技术，使其不会出现导入错误。DockerizeMe首先从Python包索引(PyPI)获取流行Python包的资源和依赖项的离线知识。然后使用基于图的推理过程构建Docker规范。我们的推理过程解决了来自Gistable数据集的近3000个gist中的892个导入错误，其中Gistable的baseline方法无法找到并安装所有依赖项。
+> &emsp;&emsp; 论文翻译 Horton E, Parnin C. DockerizeMe: automatic inference of environment dependencies for python code snippets[C]//Proceedings of the 41st International Conference on Software Engineering. IEEE Press, 2019: 328-338.
+> &emsp;&emsp;像Stack Overflow和GitHub的gist系统这样的平台，通过展示用于说明特定任务的代码片段，促进思想和编程技术的共享。Python是一种流行且快速发展的编程语言，在这两个站点上都有大量的使用，Stack Overflow上有近100万个问题，GitHub上有40万个公共仓库。不幸的是，通过这些站点共享的Python示例代码中有75%不能直接执行。当在干净的环境中运行时，超过50%的公共Python仓库会由于库的导入错误而失败。我们提出了DockerizeMe，这是一种用于推断执行Python代码片段所需的依赖库的技术，使其不会出现导入错误。DockerizeMe首先从Python包索引(PyPI)获取流行Python包的资源和依赖项的离线知识。然后使用基于图的推理过程构建Docker规范。我们的推理过程解决了来自Gistable数据集的近3000个gist中的892个导入错误，其中Gistable的baseline方法无法找到并安装所有依赖项。
 
 ## 1 引言
 
