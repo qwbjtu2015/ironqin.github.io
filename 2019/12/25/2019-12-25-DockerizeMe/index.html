@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh_Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="依赖分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="DockerizeMe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DockerizeMe:Python代码片段依赖环境自动分析工具">
+<meta property="og:url" content="http://yoursite.com/2019/12/25/2019-12-25-DockerizeMe/index.html">
+<meta property="og:site_name" content="IronQin&#39;s Blog">
+<meta property="og:description" content="DockerizeMe">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/DockerizeMe-fig1.png">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/DockerizeMe-fig2.png">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/DockerizeMe-fig3.png">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/DockerizeMe-fig4.png">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/DockerizeMe-fig5.png">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/DockerizeMe-fig6.png">
+<meta property="article:published_time" content="2019-12-25T01:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-01T09:00:31.986Z">
+<meta property="article:author" content="IronQin">
+<meta property="article:tag" content="依赖分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/posts/paper/DockerizeMe-fig1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/12/25/2019-12-25-DockerizeMe/"/>
+
+
+
+
+
+  <title>DockerizeMe:Python代码片段依赖环境自动分析工具 | IronQin's Blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh_Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IronQin's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-inbox"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/25/2019-12-25-DockerizeMe/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="IronQin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IronQin's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">DockerizeMe:Python代码片段依赖环境自动分析工具</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-25T09:00:00+08:00">
+                2019-12-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/25/2019-12-25-DockerizeMe/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/12/25/2019-12-25-DockerizeMe/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  DockerizeMe
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>&emsp;&emsp; 论文翻译 Horton E, Parnin C. DockerizeMe: automatic inference of environment dependencies for python code snippets[C]//Proceedings of the 41st International Conference on Software Engineering. IEEE Press, 2019: 328-338.<br>&emsp;&emsp;像Stack Overflow和GitHub的gist系统这样的平台，通过展示用于说明特定任务的代码片段，促进思想和编程技术的共享。Python是一种流行且快速发展的编程语言，在这两个站点上都有大量的使用，Stack Overflow上有近100万个问题，GitHub上有40万个公共仓库。不幸的是，通过这些站点共享的Python示例代码中有75%不能直接执行。当在干净的环境中运行时，超过50%的公共Python仓库会由于库的导入错误而失败。我们提出了DockerizeMe，这是一种用于推断执行Python代码片段所需的依赖库的技术，使其不会出现导入错误。DockerizeMe首先从Python包索引(PyPI)获取流行Python包的资源和依赖项的离线知识。然后使用基于图的推理过程构建Docker规范。我们的推理过程解决了来自Gistable数据集的近3000个gist中的892个导入错误，其中Gistable的baseline方法无法找到并安装所有依赖项。</p>
+</blockquote>
+<h2 id="1-引言"><a href="#1-引言" class="headerlink" title="1 引言"></a>1 引言</h2><p>&emsp;&emsp;在软件工程行业中，使用共享代码片段来说明特定的任务是非常普遍的[1]。由于分享例子的重要性，Stack Overflow和GitHub的gist系统等平台被创建出来，通过社区驱动的交互来促进社交学习[2]、[3]、[4]。GitHub gist是简短但完整的程序，通常只有一个文件。</p>
+<p>&emsp;&emsp;不幸的是，许多代码片段并不包含正确执行所需的系统配置信息，因为系统配置不是代码的固有属性。以Sentry为例，它是一个错误报告系统。Python的官方客户端Raven支持Flask框架[5]。演示如何与Flask一起使用Sentry的例子没有描述它需要安装Flask 其他库，导致开发人员遇到运行时错误。</p>
+<p>&emsp;&emsp;这是一个十分广泛的问题。Yang等人的研究发现，Stack Overflow中只有25%的代码片段可以在没有错误的情况下运行[3]。Horton和Parnin后来发现GitHub中24.4%的Python gist运行没有错误[6]。实验评估52.4%的gist失败原因是依赖错误。Seo等人也发现了近似50%的构建错误是由依赖项引起的[7]。此外，手动构建环境规范所涉及的工作并不简单——开发人员可能要花费20分钟到2个小时为单个代码片段创建Dockerfile，而且常常无法构建有效的规范[6]。常见的挑战包括将代码资源映射到其原始包，以及确定传递依赖项的正确安装顺序。</p>
+<p>&emsp;&emsp;本工作的重点是自动化语言级和系统级依赖项的系统配置管理的依赖项解析过程。在执行依赖项解析之前，我们从两个源构建一个离线知识库。首先，我们通过提取声明的资源并使用动态分析来确定可能的依赖关系，处理Python包索引(PyPI)上的现有包。其次，我们检查来自GitHub的项目配置文件，并为经常一起出现的包生成关联规则。代码段的环境推理是通过查询知识库将代码资源映射到可安装包来执行的。然后，搜索算法以一致的顺序解析所有的传递依赖项。</p>
+<p>&emsp;&emsp;我们实现了DockerizeMe，这是一个将依赖项解析应用到代码段并为相应环境生成Dockerfile的工具。与其他自动软件配置方法不同，DockerizeMe侧重于在没有外部输入的情况下推断完整的配置，而其他方法侧重于修复配置错误([8]、[9]、[10])。能够自动推断代码依赖关系可以节省开发人员的时间，降低学习和开发的成本，并在在线平台上修复和验证代码片段。这也是迈向全自动软件配置管理的第一步。</p>
+<p>&emsp;&emsp;为了评估DockerizeMe，我们对来自Gistable数据集的2891个gist进行了环境配置，在应用了来自文献[6]III-C部分的Gistable环境推断算法之后仍然出现<code>ImportError</code>的案例，DockerizeMe成功移除了了892个导入错误。总之，这项工作包含以下贡献:</p>
+<ul>
+<li>提出了使用静态分析、动态分析和开发人员生成的知识源计算包依赖关系的技术。</li>
+<li>提出了遵守安装顺序的直接依赖项和传递依赖项的推理算法。</li>
+<li>DockerizeMe: 推断依赖并构建环境的工具 <a href="https://github.com/dockerizeme/dockerizeme" target="_blank" rel="noopener">DockerizeMe</a></li>
+<li>DockerizeMe有效性的实验评估和环境配置中的额外挑战的分类。</li>
+</ul>
+<h2 id="2-案例与动机"><a href="#2-案例与动机" class="headerlink" title="2 案例与动机"></a>2 案例与动机</h2><p>&emsp;&emsp;作为示例共享的许多代码片段不是直接可执行的，这通常是因为它们依赖于外部库，而这些库在开发人员的系统上默认是不存在的[3]、[6]。发现所有必需的依赖项是一个耗时的过程，即使是经验丰富的开发人员也会有困难[6]。考虑以下场景:</p>
+<p>&emsp;&emsp;开发人员正在处理网络组件，需要解析来自网络接口的数据包。他们希望使用Python，并搜索可用于执行此任务的Python库。幸运的是，其他开发人员以前曾要求提供关于库的建议来解决相同的问题。他们很快就会在Stack Overflow3上看到一篇文章，里面有一些不同的建议。</p>
+<p>&emsp;&emsp;公认的答案推荐Scapy，但是它是在GPLv2下获得许可的，GPLv2是一种copyleft许可，开发人员不能在他们的项目中使用它。但是，另一个答案推荐Pcapy，并提供了一个示例代码片段，用于在数据包到达接口时打印它们。开发人员想要查看这个示例是否有效，因此他们创建了一个名为<code>snippet.py</code>的文件(图1a)包含示例代码，在示例中修改网络设备名称，将“要捕获的网络设备名称”改为“eth0”。不过，运行python代码段时,由于pcapy不是Python标准库的一部分，所以它们遇到了错误<code>ImportError: No moudle named pcapy</code>。</p>
+<p><img src="/images/posts/paper/DockerizeMe-fig1.png" alt="Fig1" title="Fig1 代码片段及对应的Dockerfile"></p>
+<p>&emsp;&emsp;开发人员注意到在代码片段中导入了两个包，Pcapy和Impacket。两个包都存在于Python包索引(PyPI)，因此开发人员尝试用<code>pip install pcapy impacket</code>来安装每个包。不幸的是，由于编译器错误，Pcapy无法安装。进一步的调查显示，Pcapy依赖于开发人员没有安装的pcap系统库头文件。开发人员首先尝试使用apt-get(系统的包管理器)来安装pcap包，但是不存在这样的包。实际的包名是<code>libpcap0.8</code>。但是，pcap库没有提供Pcapy需要的头文件，开发人员发现他们必须安装开发包<code>libpcap-dev</code>。图1b中的Dockerfile对最终配置进行了编码。在没有任何帮助的情况下，开发人员在发现诸如此类的环境规范的依赖项时将面临反复试验的困难。</p>
+<h2 id="3-DockerizeMe"><a href="#3-DockerizeMe" class="headerlink" title="3 DockerizeMe"></a>3 DockerizeMe</h2><p>&emsp;&emsp;DockerizeMe的主要目的是解决软件配置管理中的依赖项解析问题。我们现在定义依赖项解析问题:给定一个可运行的代码片段C，正确安装所有语言级和系统级软件包，以便C在没有导入错误的情况下执行。语言级依赖项是由包管理器或语言运行时环境提供的工具管理的依赖项。系统级或系统依赖项安装在系统上，但在语言运行时环境的外部进行管理。</p>
+<p>&emsp;&emsp;在依赖项解析上下文中，如果可以由执行环境评估代码段C，则认为它是可运行的。也就是说，它在编译或加载时不会出现致命错误。可运行代码段可能在运行时发生致命错误。如果由于未能找到所请求的库而导致致命的运行时错误，那么我们说C遇到了导入错误。</p>
+<p>&emsp;&emsp;我们关注Python，这是一种流行的语言，拥有健壮的生态系统，在它的标准库平台上包含超过146,000个标准包[11]。如果Python代码段由于Python的异常<code>ImportError</code>而退出，则会遇到导入错误。我们首先通过建立离线知识库(第四和第五部分)来解决依赖项解析问题，然后设计一个推理算法(第六部分)来以可行的安装顺序返回依赖项。</p>
+<p>&emsp;&emsp;DockerizeMe实现为一个NodeJS命令行实用程序。在Python包上运行<code>dockerizeme</code>将生成建议的Dockerfile的内容，其中包含推理过程得到的所有依赖项。</p>
+<h2 id="4-知识获取"><a href="#4-知识获取" class="headerlink" title="4 知识获取"></a>4 知识获取</h2><p>&emsp;&emsp;DockerizeMe使用离线知识库来正确推断目标脚本的依赖关系。这个知识库包含包、它们的版本和资源，以及它们之间的关系。它是通过对Libraries.io[12]数据集中的已知包应用静态和动态分析来构建的。静态分析枚举包的已知资源以供以后检索，而动态分析则收集关于传递依赖项的信息。公共Python项目中依赖项的关联规则挖掘利用了开发人员生成的系统级传递依赖项的知识。现在我们详细讨论每种技术。</p>
+<p><strong><em>A. 发现包资源</em></strong></p>
+<p>&emsp;&emsp;推断哪些包对应于脚本使用的代码资源是一项具有挑战性的任务。根据[6]的报告，许多资源的名称与它们所属的包不同。开发人员通常很难确定使用哪个包。</p>
+<p>&emsp;&emsp;为了更好地为我们的推理过程提供信息，我们分析了PyPI上的按照他们在Libraries.io[12]数据集上的SourceRank排名前10000的Python包。包是根据source rank来选择的，以包含最常用的库，因为流行的库可以影响包生态系统的大部分，并且生态系统的大小不允许对其进行全面分析[13]。如果安装成功，我们将把发行版的顶级资源记录在top_level.txt中。例如，我们从Python包biopython中提取了Bio和BioSQL资源。88%的测试包安装成功。</p>
+<p>&emsp;&emsp;由于缺少依赖项或其他未知的配置，有些包可能无法安装。当这种情况发生时，我们尝试手动下载和解析包的发行版。我们可以使用pip命令以及可选项<code>--no-cache-dir</code>和<code>--no-deps</code>下载所有包。如果包在PyPI上提供了一个wheel文件 (Python二进制格式的发行版)，我们下载它时使用的是<code>--only-binary=:all:</code>。如果这个包在PyPI上没有wheel文件，但是有一个源代码发行版，我们下载它的时候使用<code>--no-binary=:all:</code>。对于源代码发行版，我们随后尝试使用选项<code>--no-deps</code>构建一个wheel发行版。如果我们成功地为包下载或构建了一个wheel，那么我们将通过查找和读取wheel文件的top_level.txt来进行解析获得包的顶级资源。这在三分之一的包中是成功的。</p>
+<p><strong><em>B. 动态分析</em></strong></p>
+<p>&emsp;&emsp;有些包可能没有正确地列出它们的依赖项，从而阻止pip在安装期间自动处理解析。我们使用SourceRank从Libraries.io中获得的10,000个包，通过执行动态分析来解决这个问题。首先，我们尝试使用<code>pip install &lt;package&gt;</code>安装每个包。如果安装成功，则解析顶级资源并尝试导入每个资源。安装/导入过程的任何错误输出都会被记录下来，在出现错误时，我们将解析下列模式实例的输出，这些模式表示依赖于某个不存在的Python包。</p>
+<ul>
+<li><code>no module named &lt;name&gt;</code>.</li>
+<li><code>pip install &lt;name&gt;</code>.</li>
+<li><code>cannot find &lt;name&gt;</code>.</li>
+<li><code>cannot import name &lt;name&gt;</code>.</li>
+</ul>
+<p>&emsp;&emsp;例如，尝试安装Python包PyHum([14])会得到以下输出:<code>Import Error: No moudle named numpy. Please install numpy first, it is needed before installing PyHum.</code><br>&emsp;&emsp;根据输出，我们的动态分析过程将一个PyHum依赖于numpy的依赖记录输入到知识库。</p>
+<p><strong><em>C. 关联规则</em></strong></p>
+<p>&emsp;&emsp;如果安装失败并且找不到或构建不了wheel，静态和动态分析就不能提供关于包的有意义的信息。动态分析也可能由于非标准的错误消息或对C库中未知头文件的引用而无法找到包的依赖项。在其他情况下，依赖项可能是可选的，或者仅与另一个包一起需要。这是一个使用RavenSentry进行错误日志记录的简单Flask应用。</p>
+<p><img src="/images/posts/paper/DockerizeMe-fig2.png" alt="Fig2" title="Fig2 简单Flask例子"></p>
+<p>&emsp;&emsp;在安装了Flask和Raven之后，运行这个Flask的app会导致<code>ImportError: No module named blinker</code>。该系统还必须具有blinker，一个对象信令库，用于Raven与Flask正确通信。</p>
+<p>&emsp;&emsp;DockerizeMe通过使用从现有Python环境配置中学习到的规则来扩展其知识库，从而解决了这些问题。我们的目标是一个包含apt和pip安装命令的Dockerfile的公共GitHub仓库。目标仓库的列表是从谷歌BigQuery中挖掘出来的。</p>
+<p>&emsp;&emsp; <em>a)从Dockerfile中提取项目：</em>我们检查每个repo的Dockerfile，查找<code>exec</code>和<code>shell</code>格式的所有<code>RUN</code>命令。命令被规范化以删除新行和转义字符。如果该命令是exec格式的，则它还将被转换为单个命令字符串。如果一个命令字符串包含一个以上的命令，由<code>&amp;&amp;</code>、<code>||</code>或<code>;</code> 分隔，它被分割成一个单独命令的列表。</p>
+<p>&emsp;&emsp;所有以“-”开头的标记都被假定为命令标志并被忽略。在其余的词语中，以apt-get install开头的命令被解析为apt包，而以pip install开头的命令被解析为pip包。此外，通过使用apt-cache程序检查已知apt包的列表，可以验证已解析的apt包是否存在。解析过的pip包通过检查PyPI来验证是否存在。</p>
+<p>&emsp;&emsp;<em>b)从requirements文件中提取项目:</em>一些项目从requirements文件中安装Python依赖项。典型的命名约定是<code>requirements.txt</code>或<code>requirements-&lt;env&gt;.txt</code>，其中<code>env</code>可能是一个类似于生产或开发的环境。我们寻找并解析所有满足任一命名约定的requirements文件，使用PEP 508指定的requirements格式的最常见子集提取项目需求文件中的所有包说明符。任何发现的包都将被验证是否存在于PyPI上，如果存在，则包括在pip包集合中。</p>
+<p>&emsp;&emsp;<em>c)事务格式:</em>将每个项目解析后的依赖项转换为关联规则挖掘的中间事务格式。每个项目都被认为是一个单独的事务，它的包依赖关系被写为一个空格分隔的行。包名以包管理系统的名称(apt_或pip_)作为前缀。这既可以防止名称冲突，又可以在生成关联规则时保留系统信息。<br>例如，下面的Dockerfile被解析为事务：<code>apt_libmemcached-dev pip_pylibmc</code></p>
+<p><img src="/images/posts/paper/DockerizeMe-fig3.png" alt="Fig3" title="Fig3 Dockerfile转换示例"></p>
+<p>&emsp;&emsp;<em>d)规则生成:</em>关联规则由事务数据生成，使用来自R语言<code>arules</code>包的apriori算法实现。 我们使用默认的最小置信水平0.8。规则限制为最大长度为2的规则，即在前件中有一个包，在后件中有一个包。最小支持被选择来限制在事务数据中至少有三个实例的项集。选择支持级别是为了过滤随机发生的项目集。</p>
+<h2 id="5-知识表示"><a href="#5-知识表示" class="headerlink" title="5 知识表示"></a>5 知识表示</h2><p>&emsp;&emsp;我们将知识库建模为一个相互依赖的图[15]，如图2所示，使用Neo4J图形数据库存储。节点表示知识库中的现有对象，有向边表示它们之间的关系。我们现在描述在相互依赖图模式中使用的节点和边。</p>
+<p><img src="/images/posts/paper/DockerizeMe-fig4.png" alt="Fig4" title="Fig2 DockerizeMe内部依赖图中资源节点之间的关系"></p>
+<p>&emsp;&emsp;<em>a)包节点:</em> DockerizeMe知道的每个唯一的包都作为一个节点存储在相互依赖关系图中。包节点使用标签<code>package</code>进行标记，并存储包的名称和包管理系统。我们强制要求名称和包管理系统的组合是唯一的。也就是说，同一个系统提供的两个包不能有相同的名称。</p>
+<p>&emsp;&emsp;<em>b)版本节点:</em> 包的所有已知版本都表示为版本节点。版本使用标签<code>version</code>进行标记，并存储包版本号。此外，包节点到它的版本节点有一条有向边。</p>
+<p>&emsp;&emsp;<em>c)资源节点:</em> 资源是静态分析中发现的可直接导入的包对象之一。使用标签<code>resource</code>标记节点并存储对象名称。因为包的资源可能在版本之间改变，所以资源节点属于版本节点。这由版本节点的有向边表示。</p>
+<p>&emsp;&emsp;<em>d)建模依赖关系:</em> 动态分析发现包版本对外部资源的依赖关系。我们在知识库中将这种关系建模为从版本节点到匹配所需资源名称的资源节点的有向边<code>resource-&gt;dependency</code>。</p>
+<p>&emsp;&emsp;<em>e)关联节点:</em> 关联节点表示单个的关联规则。节点使用<code>association</code>标记，并维护confidence/support/lift/count的元数据。有向边<code>association</code>将包与其关联规则连接起来。一条<code>package-&gt;association</code>的边意味着package是前置条件，反之，<code>association-&gt;package</code>则意味着包是后置条件。</p>
+<h2 id="6-推断算法"><a href="#6-推断算法" class="headerlink" title="6 推断算法"></a>6 推断算法</h2><p>&emsp;&emsp;当给定目标应用程序时，推理的目标是确定运行应用程序不出错所需的所有依赖项。还有一个附加的约束，即必须以正确的顺序返回依赖项。例如，如果某个包A在安装时依赖于B和C，而B在安装时也依赖于C，那么正确的安装顺序必须是C、B、A。</p>
+<p>&emsp;&emsp;推理算法首先从目标应用程序(6-A节)中提取导入的资源，然后查询知识库以确定资源可能属于的包集合(6-B节)。然后从每个根节点开始遍历相互依赖关系图，以确定传递依赖关系(6-C节)。</p>
+<p><em>A.解析目标代码</em><br>&emsp;&emsp;第一个任务是解析目标应用程序并提取所有导入资源的列表。我们通过构建源代码的抽象语法树(AST)来实现这一点。在Python中，导入的资源由<code>Import</code>和<code>ImportFrom</code>节点定义，它们分别对应于语句<code>import &lt;package&gt;</code>和<code>from &lt;package&gt; import &lt;resource&gt;</code>。<code>Import</code>节点上的完整资源名是节点名。对于<code>ImportFrom</code>节点，完整的资源名称是模块的名称加上导入的每个资源的名称。算法1列出了访问AST中这两种节点类型的伪代码。</p>
+<p><img src="/images/posts/paper/DockerizeMe-fig5.png" alt="Fig5" title="算法1：在Python AST中的Import节点和ImportFrom节点解析导入依赖的流程"></p>
+<p>&emsp;&emsp;对资源进行筛选以排除标准库中的资源。我们使用位于imp模块中的Python导入工具检查资源是否存在于干净的Python环境中，从而执行过滤。伪代码在算法2中提供。首先，我们通过资源名查找资源的文件系统路径。如果路径查找以<code>ImportError</code>失败，我们知道这个模块不可能是标准库的一部分。如果查找成功，我们将验证资源名是否与已知的Python内置包匹配，或者资源路径是否包含<code>site-packages</code>和<code>Extras</code>。Python发行版有时会包含额外的包，但不是标准库的一部分，而<code>site-packages</code>是pip默认放置其他已安装包的地方。</p>
+<p><img src="/images/posts/paper/DockerizeMe-fig6.png" alt="Fig6" title="算法2：在Python AST中的Import节点和ImportFrom节点解析导入依赖的流程"></p>
+<p><em>B. 将资源映射到包</em></p>
+<p>&emsp;&emsp;一旦知道应用程序的资源，就必须将它们映射回一组可以安装的包。我们通过查询知识库和记录潜在匹配的包管理系统来执行这种反向查找。应用程序所需的资源与可安装包之间的匹配可能由full或对知识库中的一个或多个已知资源的部分匹配，或对已知包的完全匹配(在数据库中或通过包管理系统)。</p>
+<p>&emsp;&emsp;资源上的完全匹配查询知识库，查找名称与应用程序使用的资源名称完全匹配的任何已知资源。如果找到任何这样的资源，就返回包含它们的包。我们过滤包的结果使之不同，因为某些包可能有多个版本，但具有相同的资源。<br>部分匹配搜索任何已知资源，其中应用程序使用的资源的名称以知识库中资源的名称开头。例如，考虑下面的简单Python脚本:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> zope.interface</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Interface</span><span class="params">(zope.interface.Interface)</span>:</span></span><br><span class="line">	atter = zope.interface.Attribute(<span class="string">'Attribute'</span>)</span><br><span class="line"></span><br><span class="line">print(type(Interface))</span><br></pre></td></tr></table></figure>
+
+<p>&emsp;&emsp;该脚本导入资源zope.interface，它对应于同名的PyPI上的一个包。但是，zope.interface包有一个名为zope的顶级资源和一个名为interface的子模块。部分匹配确保在执行反向查找时匹配资源遵循此命名约定的包。寻找精确匹配是部分匹配的一种特殊情况，其中完整资源名称是等效的。<br>&emsp;&emsp;另外，我们检查是否存在与所需资源同名的包。以前的工作表明，这种情况发生的概率大约为45%，这样做可能会为资源找到正确的包，即使它的资源无法通过静态分析找到[6]。</p>
+<p><em>C. 传递依赖恢复</em></p>
+<p>&emsp;&emsp;仅知道与顶级资源对应的包通常不足以进行正确的环境配置，因为这些包本身可能依赖于其他包。包的传递依赖关系的信息通过resource_dependency和关联关系编码在相互依赖关系图中。假设相互依赖关系图包含所有必要的关系，则必须安装的包的集合P是已解析的直接依赖关系的集合S(6-B节)，与从S可以到达的包的集合R相结合。</p>
+<p>&emsp;&emsp;但是，仅仅计算p是不够的。我们还必须保持依赖关系的正确顺序，这样每个包都比其他依赖它的包先安装。为此，我们对每个包p∈S进行深度优先搜索，其中通过遵循有向resource_dependency和association关系计算相邻包。在整个DFS中维护一个有序的包列表，一旦遍历了它的所有子元素，就会将一个包p添加到列表中。与查找过程一样，每个包的名称都使用它们所属的特定包管理系统进行规范化。</p>
+<p>&emsp;&emsp;在无环图中，基于DFS的传递依赖项解析所返回的顺序导致了相反的拓扑顺序。然而，我们不能保证我们的相互依赖图是无环的。可能是两个包(正确的或不正确的)相互依赖。此外，如果两个包$p_1$和$p_2$经常一起使用，我们的关联规则挖掘可能会生成规则$p_1$-&gt;$p_2$和$p_2$-&gt;$p_1$。我们使用DFS方法作为启发。</p>
+<h2 id="7-评价"><a href="#7-评价" class="headerlink" title="7 评价"></a>7 评价</h2><p>&emsp;&emsp;Gistable([6])介绍了Gistable数据集，它是从GitHub的公共gist服务中挖掘的10,259个单文件Python脚本的集合。通过查询GitHub gist在Python语言中搜索具有至少一个star的gist的UI，并自动抓取返回的结果。对Gistable数据集的分析表明，数据集中最常见的gist退出状态是导入错误，发生概率为52%。特别是，Gistable原生方法尝试安装那些导入名称命名的包，这种的方法无法修复2,891个gist中的导入错误。我们关注的是这些“难”的gist，即原生推断算法并不能解决的这些，我们称之为HG2.9k。</p>
+<p><em>A. 方法</em><br>&emsp;&emsp;为了评估DockerizeMe，我们分析了它在HG2.9k中从gist中移除ImportError的能力。分析每个gist的第一步是使用DockerizeMe执行依赖项解析，以生成要安装的软件包列表。然后，我们在一个干净的Python 2.7.14中使用Python包管理器pip安装每个包p∈P。每个gist的执行结果被记录为运行时抛出的异常的名称(如果有的话)或Success。我们认为，在依赖项解析的上下文中，如果gist的退出状态不是ImportError就是被修复成功的。</p>
+<p>&emsp;&emsp;在评估gist时遇到的安装失败被忽略。这种选择的基本原理是，如果失败的包是gist的直接依赖项或传递依赖项，那么执行将会引起极大的恐惧。但是，由于DockerizeMe知识库中的关联规则的性质，包不一定是真正的依赖项。如果是这样，可以继续不使用包。所有的gist都在基于python:2.7.14镜像的Docker容器中进行了评估。为了提高效率，DockerizeMe 镜像将aptitude包管理器配置为通过本地代理，并通过禁用文件系统缓存和将默认超时设置为10分钟来配置pip。分析作业是在Nomad集群上调度的，Nomad集群是一个进程和容器管理系统，它本身就支持调度Docker容器。计算节点运行ubuntu16.04，有4个cpu和8GB内存。</p>
+<p><em>B. 结果</em></p>
+<p>&emsp;&emsp;我们主要根据相应的gist是否遇到了import error来对推断出的环境质量进行排序。对于成功的推断，我们还将根据直接依赖项和传递依赖项的数量以及总体依赖项的总数来考虑推断环境的特征。然后，我们定位在推断环境配置中遇到的安装故障，以及推断过程可能无法生成工作环境的原因。最后，我们将gist的退出状态视为自动化环境配置中需要解决的未来问题的一个指示。</p>
+<p>&emsp;&emsp;<em>1)推理:</em> 我们在一个来自HG2.9k的2891个Python gist上评估DockerizeMe的推理过程,HG2.9k是Gistable数据集的一个子集，即不能被原生方法解决的gist。我们的评估发现，在安装DockerizeMe推理过程中发现的依赖项所生成的环境中，另外有892个gist(31%)在没有出现过Python的ImportError的情况下执行。该结果说明了环境配置自动推理的一个重要进步。我们将在下一节中讨论未来的改进。</p>
+<p>&emsp;&emsp;<em>2)环境特征:</em> 平均而言，DockerizeMe从HG2.9k中生成的工作环境规范导入了2-3个独特的资源，与HG2.9k中所有gist的总体平均值一致。DockerizeMe报告了对前79%的gist执行至少一个名称解析，这意味着大多数的gist导入一个资源，该资源被映射到一个具有不同名称的包。40%的人至少有一个传递依赖。总的来说，导入的资源平均映射到三个直接依赖项，另外两个传递依赖项由推理过程发现。传递依赖项最有可能是附加的Python包。</p>
+<p>&emsp;&emsp;<em>3)规模:</em> DockerizeMe提出的最大的环境规范包含206个独特的Python和APT包。Python包在安装的包总数中占有较大的份额，一个环境中最多安装195个包，而APT包最多安装48个包。相比之下，在那些修复了gist导入错误的环境规范中，最大的环境规范只包含87个惟一的包，最多安装了80个Python包，9个APT包可以安装在任何环境中。在这两种情况下，大的环境规模都是一个异常值，大多数工作配置都是大于17×小。最大工作配置的大小表明需要一个后推理减少过程，该过程能够将一组建议的包减少到最小，从而仍然解决脚本的导入错误。</p>
+<p>&emsp;&emsp;<em>4)安装失败的频率:</em> 我们的评估过程忽略了推断依赖项的安装错误，如果一个包安装失败，但整体配置仍然有效，则可以从最终配置中删除失败的包。在892个固定的gist中，只有9个(1%)在构建推断的环境时发生了安装错误，但是仍然退出了，没有发生导入错误。人工检查发现4处故障是由于对Python包的未知依赖，而1个是由于对系统包的未知依赖。其余的失败要么是由于包本身的问题，要么是由于网络噪音。</p>
+<p>&emsp;&emsp;<em>5)其他失败原因:</em> 在HG2.9k中对所有的gist进行推理后，1999个gist仍然因为Python的ImportError退出。我们对30个这样的随机样本以及生成的环境规范执行了一个附加的定性编码过程，以确定推理为什么不能生成工作环境。在执行编码时，检查每个gist以确定其退出状态的根本原因。然后我们重新运行DockerizeMe的推理算法，在运行时检查推理过程，以确定没有得到修复的根本原因。我们根据没有生成正确的环境规范的最终原因对每个gist进行编码。我们在编码过程中采用协商一致的方式来解决编码的可靠性问题[17]。使用这种技术，第一作者和第二作者合作澄清代码的定义，并就所分配的代码达成一致。</p>
+<p>&emsp;&emsp;在分析的30个gist中，有15个出现了最常见的失败原因，这是因为环境规范没有发现直接的依赖关系。也就是说，gist在安装了所有推断的依赖项之后，导入了一些不存在的资源，这表明有一些从资源到DockerizeMe不知道的Python包的映射。由于环境推断没有找到传递依赖项，导致四个gist失败，这意味着推断依赖项由于额外的配置需求而无法安装，或者在推断环境中执行导致对gist没有直接导入的资源的导入错误。另外三个必需的gist为它们的依赖项推断出了正确的包，但是由于破坏了对包的API所做的更改，需要另一个版本。</p>
+<p>&emsp;&emsp;其余的gist由于导入错误而失败，但是无法通过从PyPI或APT推断依赖项来修复。例如，一些gist需要系统CPython解释器之外的执行环境。其中一个要点是作为一个出色的文本插件编写的，需要在编辑器中运行。其他的gist导入了用户需要编写的本地配置文件。<br>由于打包生态系统的大小，将资源名称映射到相应的包仍然是最大的问题(DockerizeMe在生成知识库时只分析了PyPI上前6%的包和1%的版本)。映射问题的一个简单但昂贵的解决方案已经存在:预先处理其余的包版本。然而，考虑到大型且不断增长的环境，环境推理过程可以从改进的启发式方法中受益，这种启发式方法可以预测哪些包可能属于某个资源，而无需预先建立索引。</p>
+<p>&emsp;&emsp;<em>6)被修复的gist退出状态:</em> 表1为HG2.9k的gist的ImportError被DockerizeMe解决之后的退出状态。最常见的退出状态是成功，超过50%。下一个最常见的退出状态是Python的NameError，意思是gist试图访问不存在的对象引用。在大多数情况下，NameError实例是gist本身的问题，不在DockerizeMe的关注范围之内。一个例外是使用通配符导入，其中包提供的资源已经更改。对于未来的研究，我们可以通过静态分析来确定这个用例是否常见，是否需要解决。在剩下的30%中，91个退出是由于Django的<code>ImproperlyConfigured</code>错误造成的，41个退出是由于<code>IOError.ImproperlyConfigured</code>造成的。他们都是由于Django框架在初始化时在设置文件中缺少所需的配置而造成的。<code>IOError</code>可以指示与服务(如数据库服务器)通信的问题。<br>应用推断后最常见的退出码与Gistable([6]表I)发现的非常相似，但SyntaxError及其子异常IndentationError除外，它们被选择条件过滤掉了。未来的研究可以评估，为了生成提供这些资源的环境配置，gist如何依赖配置文件、环境变量和外部服务。</p>
+<p>&emsp;&emsp;<em>7)总结:</em> 我们对结果进行了简单总结：我们的推理算法比baseline方法多恢复了31%的环境混淆。DockerizeMe能够在没有直接名称匹配的情况下成功地解析正确的包，并发现传递依赖项。Python gist通常需要非平凡的环境配置才能运行。需要进一步的工作来处理其他的配置步骤，比如丢失环境变量和提供预期的服务。</p>
+<p><em>C. 对实际代码片段的推断</em></p>
+<p>&emsp;&emsp;下面的代码片段演示了DockerizeMe的推理算法如何克服困难提供正确的环境规范。</p>
+<p>&emsp;&emsp;<em>1)包名解析:</em> 要克服的第一个挑战是确定哪些包提供了代码段使用的资源。正如[6]所发现的，对于具有执行软件配置经验的开发人员来说，确定要安装的正确包仍然是一项具有挑战性的任务。考虑下面的代码片段，它导入资源PIL并使用它创建和保存一个新图片。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line">img = Image.new(<span class="string">'RGB'</span>, (<span class="number">100</span>, <span class="number">100</span>))</span><br><span class="line">img.save(<span class="string">'image.png'</span>)</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;PIL不是Python标准库的一部分，所以必须安装包含它的包。PyPI上有个包叫PIL，但尝试安装会显示包没有维护，并且没有可以实际安装的发布版本。<br>DockerizeMe意识到不能安装PIL，因为它没有可用的版本。此外，它还知道另一个Python包Pillow也有一个名为PIL的资源。推理算法推荐下面的Dockerfile，它可以运行代码片段而不会出现导入错误。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">FROM python:2.7.13</span><br><span class="line">COPY snippet.py /snippet.py</span><br><span class="line">RUN [<span class="string">"pip"</span>, <span class="string">"install"</span>, <span class="string">"Pillow"</span>]</span><br><span class="line">CMD [<span class="string">"python"</span>, <span class="string">"/snippet.py"</span>]</span><br></pre></td></tr></table></figure>
+
+<p>&emsp;&emsp;<em>2)传递依赖项:</em> 依赖项解析面临的另一个挑战是确定传递依赖项。在某些情况下，代码段可以依赖于一个包，而这个包本身又依赖于一个或多个其他包。下面的代码片段演示了如何使用模块dashtable将html格式的表转换为GitHub markdown表。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> dashtable</span><br><span class="line">print(dashtable.html2md(<span class="string">"""</span></span><br><span class="line"><span class="string">		&lt;table&gt;</span></span><br><span class="line"><span class="string">			&lt;tr&gt;&lt;th&gt;Header 1&lt;/th&gt;&lt;th&gt;Header2&lt;/th&gt;&lt;/tr&gt;</span></span><br><span class="line"><span class="string">			&lt;tr&gt;&lt;td&gt;Data 1&lt;/td&gt;&lt;td&gt;Data 2&lt;/td&gt;&lt;/tr&gt;</span></span><br><span class="line"><span class="string">		&lt;/table&gt;</span></span><br><span class="line"><span class="string">	"""</span>))</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;PyPI上有一个名为dashtable的包，可以安装它。但是，在安装了dashtable后运行该代码段会导致错误<code>ImportError: No module named bs4</code>。这是因为dashtable依赖于bs4模块来解析html。幸运的是，dashtable在DockerizeMe的知识库中，推理算法正确地推断出dashtable依赖于beautifulsoup4，这个包提供了bs4模块。使用DockerizeMe运行代码片段生成的dockerfile将正确打印转换后的表。通常，一个代码片段可能对一个包有传递依赖关系，而这个包不是通过PyPI提供的。考虑下面的代码片段，它使用了pylibmc模块。PyPI上的pylibmc包在干净的环境中无法编译，因为它缺少头文件<code>memcache .h</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pylibmc</span><br><span class="line">mc = pylibmc.Client([<span class="string">"127.0.0.1"</span>])</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;关联规则挖掘在这里提供了正确的推理。在构建知识库时解析的配置脚本中，安装pylibmc的任何脚本都可能使用apt-get包管理器安装libmemcache -dev。DockerizeMe提出了一个Dockerfile，它在安装pylibmc之前安装memcached，从而使得代码段无错误地执行。</p>
+<p><em>D. 局限性</em></p>
+<p>&emsp;&emsp;虽然我们的技术可以发现未指定的依赖项，但是可以执行的推理类型受限于我们现有的知识来源。我们现在介绍每一个限制和它们背后的原因。</p>
+<p>&emsp;&emsp;<em>a) 知识库不完整：</em> DockerizeMe的Python包知识库是通过对Libraries.io数据集中按照SourceRank排名前1万个包进行分析而建立的。在GitHub上公共仓库中的Dockerfile和requirements文件的关联规则挖掘负责填充已知的apt包。虽然我们的知识生成过程是针对最频繁使用的包设计的，但是它并没有完整的生态系统知识。apt生态系统在默认的仓库中有超过42000个包。PyPI有近15万个包，有超过100万个独特的版本可供下载。虽然分析整个生态系统可以解决由于不知道特定依赖项而导致的推断失败，但是这种分析很难在可行的时间框架内完成。<em>此外，强制公共注册中心不能通知知识库关于通过git可用的包或托管在私有镜像上的包。</em></p>
+<p>&emsp;&emsp;<em>b) 版本推断：</em> 知识库的生成和顺序推理过程只考虑一个包的最新版本。但是，代码片段可能依赖于包的另一个版本的原因有很多，包括弃用、删除和重命名。此外，代码片段和依赖要求不同的Python版本是不支持的。</p>
+<p>&emsp;&emsp;<em>c) 包来源：</em> DockerizeMe侧重于通过推断代码片段的软件依赖关系来启用带有导入错误的代码片段的执行。当修复导入错误时，退出状态被认为是<code>Success</code>。但是，gist可能依赖于正在运行的服务。例如，导入MySQL数据库驱动程序的gist可能会尝试连接到MySQL服务器。DockerizeMe可以安装数据库包，但目前无法配置和运行数据库服务。</p>
+<p>&emsp;&emsp;<em>d) 无法安装的包：</em> :Python和apt生态系统中可用的一些包可能无法安装。例如，Python Quartz有一个已知的bug，由于包系统[18]配置不当，导致安装时出现致命错误。另一个包PyTorch无法通过PyPI进行安装，但是维护人员在PyPI上托管了一个空包，安装失败，并向用户提供了一条有用的消息[19]。DockerizeMe在这两种情况下都不能产生正确的推论，因为它假定在知识获取过程中发现的包是可安装的。</p>
+<p>&emsp;&emsp;<em>e) 硬件和操作系统要求：</em> 有些包需要特定的硬件，比如树莓派，或者特定的操作系统，比如Windows。DockerizeMe不能提供硬件配置，并且在构建Dockerfile时不考虑系统的当前配置。另外，DockerizeMe知识库是用来自apt包生态系统的系统依赖项构建的，不了解Windows的系统依赖项，Windows没有正式的包管理器。</p>
+<h2 id="8-讨论与展望"><a href="#8-讨论与展望" class="headerlink" title="8 讨论与展望"></a>8 讨论与展望</h2><p>&emsp;&emsp;虽然DockerizeMe的推理算法能够修复HG2.9k中近三分之一的导入错误，但是在应用我们的推理程序后，仍然由于<code>ImportError</code>而退出的gist需要我们未来解决。还需要其他技术来改进推断环境的质量，可以改进推断算法，也可以增加附加的后处理步骤。</p>
+<p>&emsp;&emsp;<em>a)探索其他知识来源:</em> DockerizeMe的知识库是根据对公共Python包的静态和动态分析的结果生成的，以及从公开可用的Dockerfiles中添加关联规则。然而，这些并不是唯一可用的知识来源。其他潜在的知识来源包括额外的构建或配置脚本(如Vagrantfiles)和来自TravisCI等服务的持续集成日志。使用系统依赖图技术（[20]、[21]）进行静态和动态分析，可以通过包的API检测对废弃特性的依赖或变化来执行包版本级别的推断。此外，开发人员在Stack Overflow等站点上生成的知识可能是可用的数据源。对于指示要安装的包列表的代码块，使用这些列表作为关联规则挖掘的事务，解析可接受的答案可能就足够了。另一个研究领域可能是使用自然语言处理来挖掘与推理过程中遇到的问题相似的问题，然后自动采用用高评分的答案作为解决方案。</p>
+<p>&emsp;&emsp;<em>b)打破循环:</em> 我们目前使用DFS来返回一个翻转的拓扑排序作为启发，因为它只有在底层图是非循环的情况下才能保证是正确的。由于包装生态系统和关联规则生成的性质，我们不能保证在相互依赖关系图中不产生有向循环。未来的研究需要关注这些案例的普遍性，以及它们是否对构建过程中的问题负责。如果DFS实现中的假设导致依赖项的安装顺序不正确，我们可以尝试其他打破循环的方法。一种方法是计算各连通分量的反馈边集合，以保证最少的后边被忽略。</p>
+<p>&emsp;&emsp;<em>c)反馈式直接推理:</em> 大部分推理过程离线进行。也就是说，知识获取发生在推理之前，推理过程本身生成一个单一的静态配置。在解决了不正确的依赖项的情况下，除了忽略安装错误这一原本的过程外，这并没有为推理提供回溯或从错误中恢复的能力。未来的研究将集中于反馈导向推理，在这个过程中，推理是与分析一起迭代执行的。在线执行推理将允许DockerizeMe确定应用配置是否会导致导入错误的解决。如果没有，推理可能会回溯并尝试另一种配置。应用反馈定向推理可以帮助提高环境规范的整体质量，最小化对推理后处理的需求，并允许推理过程在处理gist时进行学习。<br>&emsp;&emsp;<em>d)后处理以减少不必要的依赖:</em> DockerizeMe为HG2.9k推断出的最大的工作配置包含了87个不重复的包，而大多数工作配置超过17×更小。这表明需要一种推理方法来将环境规范简化为最小的工作配置。增量调试可能是最小化环境规范的一种可行方法。由DockerizeMe生成的Dockerfile使用专用的运行指令安装依赖项。从DockerizeMe生成的完整规范开始，我们可以通过删除运行指令来进行增量调试，直到保留最小的依赖集。与标准应用程序修复上下文中的增量调试相比，增量调试Dockerfile的挑战在于，可能没有易于执行的测试套件来评估环境的质量。即使在DockerizeMe的上下文中，成功的标准是由可执行文件是否以特定的状态退出，构建一个完整的环境所需的时间也是令人望而却步的。除了下载所需的时间之外，许多Python依赖项还需要根据本地文件系统中的头文件进行编译。额外的编译步骤会增加整个构建时间。Docker确实能够为构建中的每个独立阶段缓存层。但是，只有当父层已经在缓存中并且指令字符串与用于在缓存中生成子层的指令字符串完全匹配时，缓存才有效。这一限制大大降低了在增量调试期间利用构建缓存的能力。可以确定增量调试的最佳顺序，以最大限度地使用缓存。我们还可以利用DockerizeMe的相互依赖图中的稀疏性，并在独立组件上执行增量调试。如果独立组件相对于推断环境的大小平均较小，那么搜索空间的总大小可以大大减少。</p>
+<p>&emsp;&emsp;<em>e)其他语言:</em> DockerizeMe侧重于Python，但它的推理过程和挖掘过程只要求对导入和导出的资源进行源代码解析。我们相信我们的方法可以推广到像R或NodeJS这样的语言，因为这些语言符合我们的要求。未来的研究可以评估DockerizeMe处理这些语言配置的能力。</p>
+<h2 id="9-相关工作"><a href="#9-相关工作" class="headerlink" title="9 相关工作"></a>9 相关工作</h2><p>&emsp;&emsp;Cito等人通过检查公共GitHub仓库来调查Docker生态系统的当前状态。他们发现只有66%的公开Dockerfile可以被构建，大多数问题是由依赖引起的，大多数Dockerfile的更改是为了解决构建依赖[22]。根据他们的分析，最常见的依赖项错误是未能确定一个依赖项的版本。虽然他们的研究集中在Docker容器的可构建性，但它仍然是一个经验分析，没有试图修复损坏的配置。</p>
+<p>&emsp;&emsp;Hassan和Wang的工作直接集中在修复配置构建脚本。HireBuild(历史驱动的构建脚本修复)，是基于从TravisTorrent数据集[23]中发现的潜在修复来修复失败的gradle构建脚本。他们的工作与我们的相似之处是，它整合了来自现有的、开发人员驱动的源的知识，并使用这些信息来推断在构建脚本中编写的正确的环境规范。其他配置修复文件系统和配置脚本[24]或捕获和回放开发人员更改[8]之间的目标不一致的方法。Macho等人通过更新依赖项版本、删除列出的依赖项或显式指定公共存储库[25]，专注于使用Maven构建系统修复Java项目。</p>
+<p>&emsp;&emsp;与这些方法相比，我们的工作重点是为代码库生成完整的环境规范，而不需要预先配置或开发人员输入。据我们所知，这是首次成功地使用分析完全从零开始推断环境规范。Cimplifier是一种将容器资源分割成一组较小的独立容器[26]的技术。Cimplifier过程的一个自然的副作用是容器瘦身，因为它只维护应用程序执行期间使用的资源。类似的流程可能是增量调试的合理替代方案，但可能会受到动态分析的限制，无法发现所有依赖关系。</p>
+<h2 id="10-总结"><a href="#10-总结" class="headerlink" title="10 总结"></a>10 总结</h2><p>&emsp;&emsp;我们研究一种自动推理和配置计算环境的技术，这种环境能够执行任意的python代码片段而不会导致导入错误。我们的技术构建了一个已知Python包的知识库。它使用静态分析、动态分析和关联规则挖掘包依赖关系的信息。依赖项以正确的安装顺序解析。最后，我们提供了一个DockerizeMe工具，它将环境配置作为Docker容器系统的Dockerfile来传递。我们的研究结果表明DockerizeMe比baseline环境配置方法提高了30%。 DockerizeMe是自动化环境配置的第一步，这个过程可以节省开发人员的时间和精力，并减少应用程序部署中的潜在错误。虽然我们重点关注Python代码片段的可执行性，但是我们相信我们的推理过程可以扩展到其他语言的包管理生态系统。未来的研究将集中于改进推理过程，并研究对其他配置属性(如环境变量或外部服务)的支持。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E4%BE%9D%E8%B5%96%E5%88%86%E6%9E%90/" rel="tag"># 依赖分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/10/31/2019-10-31-introduction_to_transformer/" rel="next" title="读懂Transformer">
+                <i class="fa fa-chevron-left"></i> 读懂Transformer
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/01/02/2019-11-14-%E4%BE%9D%E8%B5%96%E6%A3%80%E6%B5%8B%E6%8A%80%E6%9C%AF/" rel="prev" title="Python依赖检测技术发展">
+                Python依赖检测技术发展 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">IronQin</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20inbox">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/qwbjtu2015" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="qwbjtu15@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-引言"><span class="nav-number">1.</span> <span class="nav-text">1 引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-案例与动机"><span class="nav-number">2.</span> <span class="nav-text">2 案例与动机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-DockerizeMe"><span class="nav-number">3.</span> <span class="nav-text">3 DockerizeMe</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-知识获取"><span class="nav-number">4.</span> <span class="nav-text">4 知识获取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-知识表示"><span class="nav-number">5.</span> <span class="nav-text">5 知识表示</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-推断算法"><span class="nav-number">6.</span> <span class="nav-text">6 推断算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-评价"><span class="nav-number">7.</span> <span class="nav-text">7 评价</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-讨论与展望"><span class="nav-number">8.</span> <span class="nav-text">8 讨论与展望</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-相关工作"><span class="nav-number">9.</span> <span class="nav-text">9 相关工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-总结"><span class="nav-number">10.</span> <span class="nav-text">10 总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">IronQin</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'A4xJ0gMfTQNSOhBKBVAPYmJ4-gzGzoHsz',
+        appKey: 'WL7KU6T9csIghQLuHXPgDKNo',
+        placeholder: '有什么想说的~',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
