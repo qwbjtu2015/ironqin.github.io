@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh_Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="机器学习," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Transformer结构分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="读懂Transformer">
+<meta property="og:url" content="http://yoursite.com/2019/10/31/2019-10-31-introduction_to_transformer/index.html">
+<meta property="og:site_name" content="IronQin&#39;s Blog">
+<meta property="og:description" content="Transformer结构分析">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/transformer-fig1.png">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/transformer-fig2.png">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/transformer-fig3.png">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/transformer-fig5.png">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/transformer-fig6.png">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/transformer-fig7.png">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/transformer-fig8.png">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/transformer-fig9.png">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/transformer-fig10.jpg">
+<meta property="og:image" content="http://yoursite.com/images/posts/paper/transformer-fig11.png">
+<meta property="article:published_time" content="2019-10-31T01:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-01T08:58:53.882Z">
+<meta property="article:author" content="IronQin">
+<meta property="article:tag" content="机器学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/posts/paper/transformer-fig1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/10/31/2019-10-31-introduction_to_transformer/"/>
+
+
+
+
+
+  <title>读懂Transformer | IronQin's Blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh_Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IronQin's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-首页">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-标签">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-分类">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-归档">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-inbox"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-关于">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/10/31/2019-10-31-introduction_to_transformer/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="IronQin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IronQin's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">读懂Transformer</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-10-31T09:00:00+08:00">
+                2019-10-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/10/31/2019-10-31-introduction_to_transformer/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/10/31/2019-10-31-introduction_to_transformer/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  Transformer结构分析
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;Transformer是Google在论文<code>Attention Is All Your Need</code>中提出的用于替代RNN提取序列特征的网络结构。在介绍Transformer之前，首先说一下RNN存在的问题。</p>
+<p>&emsp;&emsp;RNN常被用于Seq2Seq问题中，用于提取有时间序列的特征，它的两种变体LSTM和GRU则是解决了梯度传播中梯度消失和梯度爆炸的问题，但由于RNN本身的特性，它在计算时必须串行进行，因为每一步的计算都依赖于前一个单元的隐层输出，因此其训练速度较慢，难以加速。</p>
+<p><img src="/images/posts/paper/transformer-fig1.png" alt="Fig1 "></p>
+<p>&emsp;&emsp;基于RNN难以并行化的缺点以及之前提出的基于Attention的做法，Google更进一步，将整个RNN由Transformer结构替代,完全摒弃了RNN的结构，那么Transformer的结构是什么样的呢？它又是如何实现并行化的呢？</p>
+<h2 id="1-Attention"><a href="#1-Attention" class="headerlink" title="1. Attention"></a>1. Attention</h2><h3 id="1-1-Self-Attention"><a href="#1-1-Self-Attention" class="headerlink" title="1.1 Self-Attention"></a>1.1 Self-Attention</h3><p>&emsp;&emsp;在介绍主角Transformer之前，我们首先介绍一下Self-Attention的结构，因为它是理解Transformer的关键部分。</p>
+<p><img src="/images/posts/paper/transformer-fig2.png" alt="Fig2 "></p>
+<p>&emsp;&emsp;如上图所示，左侧为Bi-RNN的一层，右侧是Self-Attention的一层，我们可以理解为Self-Attention就是RNN结构的替代品，他和RNN一样，输入的一个序列，输出也是一个等长序列，那么它的内部从输入到输出又是如何计算的呢？</p>
+<p><img src="/images/posts/paper/transformer-fig3.png" alt="Fig3 "></p>
+<p>&emsp;&emsp;上图中我们可以把输入看做一个短句子，如<code>机器学习</code>，那么x1则是<code>机</code>对应的one-hot向量，同理，其它几个xi是另外三个字对应的one-hot向量。那么$a_i$向量则是每个$x_i$词汇对应的词向量，通过W词向量矩阵与$x_i$向量相乘获得，维度多在50-300左右。W词向量矩阵通过上下文学习预训练所得，这里不展开讲。</p>
+<blockquote>
+<p>注：此处，我们为了表示方便，将一个字对应一个输入，在实际使用中当然也可以将一个词对应为一个输入，如果以字为输入，那么xi向量的维度则是字的数量【汉字常用字大概为4000左右】，如果以词为输入，则xi向量的长度则是词表的大小。</p>
+</blockquote>
+<p>&emsp;&emsp;之后，每个词向量ai会分别与三个矩阵Wq/Wk和Wv相乘，分别得到三个向量$q_i$/$k_i$/$v_i$.</p>
+<center>q: query(to match others)</center>
+<center>$q^i = W^qa^i$</center>
+<center>k: key(to be matched)</center>
+<center>$k^i = W^ka^i$</center>
+<center>v: information to be extracted</center>
+<center>$v^i = W^va^i$</center>
+
+<p>&emsp;&emsp;这里的三个矩阵W都是通过网络学习得到，如下图所示，前一层为$a_i$，后一层为$q_i$，那么他们之间的权重这是矩阵$W_q$。</p>
+<p><img src="/images/posts/paper/transformer-fig5.png" alt="Fig5 "></p>
+<p>&emsp;&emsp;在获得了三个向量q、k、v后，我们将要计算每个词与输入中其他所有词的attention，所谓词与词之间的attention，我们可以理解为他们之间的一个关注度，它是一个数值。这个关注度如何计算呢？</p>
+<p><img src="/images/posts/paper/transformer-fig6.png" alt="Fig6 "></p>
+<p>&emsp;&emsp;如上图所示，要计算x1词与其他词之间的attention，则通过$x_1$的查询向量$q_1$分别与自己和其他词的k向量做点积，这样则得到了四个权重。</p>
+<center>$\alpha_{1,i} = \frac{q_1\cdot k_i}{\sqrt{d}}$</center>
+
+<p>&emsp;&emsp;上式中d是q、k的维度，论文中为64，在这里除以根号d的目的在于防止q和k的维度对于该值的影响，因为q与v的点积随着他们的维度增加会变大，因此除以维度来抵消影响。</p>
+<p><img src="/images/posts/paper/transformer-fig7.png" alt="Fig7 "></p>
+<p>&emsp;&emsp;然后对得到的α向量进行softmax，使得他们的和为1，那么每一个值则对应了$x_1$应该关注的关注度，因此$a_1$的输出$b_1$则是α向量与$v_i$的加权求和：</p>
+<center>$b_1 = \sum_{i=1}^{4}\alpha_{1,i}\ast v_i$</center>
+
+<p>&emsp;&emsp;其余$b_2$/$b_3$/$b_4$同样进行计算。</p>
+<p><img src="/images/posts/paper/transformer-fig8.png" alt="Fig8 "></p>
+<p>&emsp;&emsp;回到上面这张图，我们就解释完了Self-Attention中从输入$a_i$到输出$b_i$的全部计算过程，简单回顾就是：先通过三个矩阵与$a_i$相乘得到对应$a_i$的三个向量$q_i$，$k_i$，$v_i$，然后通过$q_i$分别与所有$k_i$向量点积得到一组attention向量，归一化后再与$v_i$加权求和，得到输出$b_i$向量，这个过程中每个$b_i$之间的计算没有依赖关系，因此可以通过矩阵计算一同完成，而GPU对于矩阵运算的加速非常擅长，因此可以大大提升计算速度。</p>
+<h3 id="1-2-Multi-Head-Attention"><a href="#1-2-Multi-Head-Attention" class="headerlink" title="1.2 Multi-Head Attention"></a>1.2 Multi-Head Attention</h3><p>&emsp;&emsp;上面讲的Self-Attention是是单个head的，他们有一组$W_q$、$W_k$和$W_v$，那么multi-head我们可以理解为多组矩阵$W_q$、$W_k$和$W_v$，下图展示了2个head的情况：</p>
+<p><img src="/images/posts/paper/transformer-fig9.png" alt="Fig9 "></p>
+<p>&emsp;&emsp;每个输入$a_i$，通过上述计算可以得到两个$b_i$，两个$b_i$进行concat，然后可以再乘上一个权重矩阵得到与$q_i$同维度的向量，这个权重矩阵和上述过程中$W_q$一样，也是通过网络学习得到。</p>
+<p>&emsp;&emsp;那么为什么要使用多个head呢？每个head又有什么不同呢？</p>
+<p>&emsp;&emsp;论文给出的解释是不同的head的关注范围会不一样，比如一个只关注附近的词汇，而另一个更关注全局所有词汇，论文后面所附可视化的展示也证实了这一点。</p>
+<p>&emsp;&emsp;OK，到此为止，终于把Self-Attention的部分讲完了，下面我们来看一下Transformer吧。</p>
+<h3 id="1-3"><a href="#1-3" class="headerlink" title="1.3"></a>1.3</h3><h2 id="2-Transformer"><a href="#2-Transformer" class="headerlink" title="2. Transformer"></a>2. Transformer</h2><h3 id="2-1-Transformer结构"><a href="#2-1-Transformer结构" class="headerlink" title="2.1 Transformer结构"></a>2.1 Transformer结构</h3><p><img src="/images/posts/paper/transformer-fig10.jpg" alt="Fig10 "></p>
+<p>&emsp;&emsp;相信这个图大家已经在各种教程上看过无数遍了，今天我们再仔细理一下这其中的细节。</p>
+<h3 id="2-2-位置编码"><a href="#2-2-位置编码" class="headerlink" title="2.2 位置编码"></a>2.2 位置编码</h3><p>&emsp;&emsp;在上图中的输入和输出Embedding时都有位置编码信息加入，在这里加入位置编码是由于Self_attention内部对于每个词的位置实际上是没有信息的，词的位置对Self-Attention的计算结果没有影响，这就导致Transformer结构无法捕捉位置信息，所以在最开始的Embedding与位置编码相加，这里不是concat，不使用concat原因下图解释。</p>
+<p><img src="/images/posts/paper/transformer-fig11.png" alt="Fig11 "></p>
+<h3 id="2-3"><a href="#2-3" class="headerlink" title="2.3"></a>2.3</h3>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" rel="tag"># 机器学习</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/10/17/2019-10-17-ServerlessComputationWithLambda/" rel="next" title="Serverless Computation With OpenLambda">
+                <i class="fa fa-chevron-left"></i> Serverless Computation With OpenLambda
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/25/2019-12-25-DockerizeMe/" rel="prev" title="DockerizeMe:Python代码片段依赖环境自动分析工具">
+                DockerizeMe:Python代码片段依赖环境自动分析工具 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="IronQin" />
+            
+              <p class="site-author-name" itemprop="name">IronQin</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/qwbjtu2015" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:qwbjtu15@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Attention"><span class="nav-number">1.</span> <span class="nav-text">1. Attention</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-Self-Attention"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 Self-Attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-Multi-Head-Attention"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 Multi-Head Attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3"><span class="nav-number">1.3.</span> <span class="nav-text">1.3</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Transformer"><span class="nav-number">2.</span> <span class="nav-text">2. Transformer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-Transformer结构"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Transformer结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-位置编码"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 位置编码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3"><span class="nav-number">2.3.</span> <span class="nav-text">2.3</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">IronQin</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'A4xJ0gMfTQNSOhBKBVAPYmJ4-gzGzoHsz',
+        appKey: 'WL7KU6T9csIghQLuHXPgDKNo',
+        placeholder: '有什么想说的~',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
