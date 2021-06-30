@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh_Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="架构," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="介绍常见的集中消息队列的优缺点及应用场景">
+<meta property="og:type" content="article">
+<meta property="og:title" content="消息队列">
+<meta property="og:url" content="https://qwbjtu2015.github.io/2021/06/21/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/index.html">
+<meta property="og:site_name" content="IronQin&#39;s Blog">
+<meta property="og:description" content="介绍常见的集中消息队列的优缺点及应用场景">
+<meta property="article:published_time" content="2021-06-21T11:34:00.000Z">
+<meta property="article:modified_time" content="2021-06-30T13:53:32.868Z">
+<meta property="article:author" content="IronQin">
+<meta property="article:tag" content="架构">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://qwbjtu2015.github.io/2021/06/21/消息队列/"/>
+
+
+
+
+
+  <title>消息队列 | IronQin's Blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh_Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IronQin's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-首页">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-标签">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-分类">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-归档">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-inbox"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-关于">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://qwbjtu2015.github.io/2021/06/21/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="IronQin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IronQin's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">消息队列</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-06-21T19:34:00+08:00">
+                2021-06-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/06/21/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/06/21/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  介绍常见的集中消息队列的优缺点及应用场景
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-什么是消息队列"><a href="#1-什么是消息队列" class="headerlink" title="1. 什么是消息队列"></a>1. 什么是消息队列</h2><p>&emsp;&emsp;类似于生产者消费者模型，有一个模块生产数据，有其他模块要消费数据，生产和消费的速度不一样，就出现了中间组件消息队列，它的作用是存储等待消费的数据，本质来讲它是个数据存储结构。</p>
+<p>两种常见模型：点对点和发布/订阅Topic：点对点指的是生产者发布的消息给所有消费者消费，这些消息只会被消费一次，而且会均衡的分配给所有消费者，以满足负载平衡。发布和订阅：发布是数据生产者产生一个数据，将其发布为一个Topic，而这个topic可能有多个订阅者，如A、B、C，那么ABC将会独立的消费这些消息，A消费与B消费是独立的、不相关的。</p>
+<h2 id="2-应用场景"><a href="#2-应用场景" class="headerlink" title="2. 应用场景"></a>2. 应用场景</h2><p>&emsp;&emsp;消息队列的使用一般解决三个问题：解耦、异步、削峰。解耦是指将数据生产模块与数据消费模块解耦合，不再使用紧密的接口调用方式，而是生产者仅仅负责将数据放到消息队列，至于谁来消费，怎么消费一概不用负责；所谓异步，指的是生产模块与消费模块分离后，只需好将数据放入消息队列，即可完成返回用户，降低系统反馈时间，提升用户体验，后续真正的数据处理异步进行；而削峰则是类似的，数据的生产消费分离会导致高峰请求可以铺平到时间上，让系统一直处于高位运行，既能快速响应请求，又可以保证数据不丢失。</p>
+<p>&emsp;&emsp;问题：当然引入消息队列也会出现许多问题，如：（1）系统可靠性降低，消息队列作为生产消费的中介，如果出现问题，则会导致系统崩溃（2）系统复杂性增加，消息队列的引入不可避免地使系统复杂性上升，一系列问题需要考虑，如数据消费失败、重复消费、数据不一致等等。保证消息队列的高可用和数据一致性是必须要考虑的。</p>
+<h2 id="3-常见消息队列优缺点"><a href="#3-常见消息队列优缺点" class="headerlink" title="3. 常见消息队列优缺点"></a>3. 常见消息队列优缺点</h2><p>&emsp;&emsp;常见的消息队列有ActiveMQ、RabbitMQ、RocketMQ、Kafka四种。</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>ActiveMQ</th>
+<th>RabbitMQ</th>
+<th>RocketMQ</th>
+<th>Kafka</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单机吞吐量</td>
+<td>万级</td>
+<td>万级</td>
+<td>十万级</td>
+<td>十万级</td>
+</tr>
+<tr>
+<td>topic数量对吞吐量影响</td>
+<td>-</td>
+<td>-</td>
+<td>影响小，可达百、千</td>
+<td>影响大，尽量减少topic数量</td>
+</tr>
+<tr>
+<td>时效性</td>
+<td>毫秒</td>
+<td>微秒</td>
+<td>毫秒</td>
+<td>毫秒</td>
+</tr>
+<tr>
+<td>可用性</td>
+<td>高</td>
+<td>高</td>
+<td>非常高、分布式架构</td>
+<td>非常高、分布式架构</td>
+</tr>
+<tr>
+<td>消息可靠性</td>
+<td>较低概率丢失数据</td>
+<td>基本不会丢失</td>
+<td>参数优化配置后可以0丢失</td>
+<td>与前项一致</td>
+</tr>
+<tr>
+<td>功能支持</td>
+<td>极其完备</td>
+<td>基于erlang开发，并发强，性能好，延迟低</td>
+<td>分布式，扩展性好，功能较完备</td>
+<td>功能较简单，主要用于大数据领域实时计算和日志采集</td>
+</tr>
+</tbody></table>
+<h2 id="4-高可用的实现方式"><a href="#4-高可用的实现方式" class="headerlink" title="4. 高可用的实现方式"></a>4. 高可用的实现方式</h2><h3 id="4-1-RabbitMQ"><a href="#4-1-RabbitMQ" class="headerlink" title="4.1 RabbitMQ"></a>4.1 RabbitMQ</h3><p>&emsp;&emsp;RabbitMQ的实现方式是基于<code>主从</code>（非分布式）,三种部署模式：单机、普通集群、镜像集群。其中只有镜像集群是实现了高可用。队列的元数据和消息都会存储于多个实例上，也就是每个节点都有这个队列的完整镜像，每次写入或消费都会自动进行消息同步。</p>
+<p>&emsp;&emsp;优点是：可靠性强，不怕任意节点宕机；缺点是很难扩展（最大性能取决于单节点性能）、资源浪费（太多重复数据）、网络传输消耗极大（节点间数据同步）</p>
+<h3 id="4-2-Kafka"><a href="#4-2-Kafka" class="headerlink" title="4.2 Kafka"></a>4.2 Kafka</h3><p>&emsp;&emsp;基于分布式架构实现，由多个broker组成，每个broker是一个节点，创建一个topic，该topic被划分为多个partition，每个分片中只存放一部分数据，每个分片可以存在于不同的节点上。</p>
+<p>&emsp;&emsp;这是<code>分布式消息队列</code>架构，即一个topic的数据分散在多个节点上。</p>
+<p>&emsp;&emsp;Kafka 0.8之前，数据分片是没有备份的，也就是说如果一个节点宕机，那么这个节点上的数据将会不可用。 0.8之后才提出了HA（高可用）机制，也就是数据副本，每个数据分片都会同步到其它机器上，形成多个副本，所有这些重复的数据分片选举出一个leader，其它的自动成为follower，所有的数据生产和消费都需要与leader直接交互。数据读（消费）直接读leader上的数据，数据写（生产）会先写入到leader，然后由leader同步到follower。Kafka会自动将一个数据片的多个副本均匀分布在不同节点上。</p>
+<p>&emsp;&emsp;当某个节点宕机时，如果恰好某个数据分片的leader是该节点，那么就会重新选举一个leader。</p>
+<blockquote>
+<p>注：这里的多个副本所在的节点实际上没有分担负载，只是承担了数据安全（高可用）的功能。至于为什么数据消费也不能直接从follower操作，个人考虑是数据消费并不是简单的读操作，这也同样涉及数据的修改，如出队或指针移动等，因此必须保证多副本一致性。</p>
+</blockquote>
+<p>&emsp;&emsp;写数据的时候，生产者就写入leader，然后leader将数据写本地磁盘，接着其它follower 自己主动从 leader 来 pull 数据。一旦所有 follower 同步好数据了，就会发送 ack 给 leader，leader收到所有follower的ack 之后，就会返回写成功的消息给生产者。（当然，这只是其中一种模式，还可以适当调整这个行为）</p>
+<p>&emsp;&emsp;消费的时候，只会从 leader 去读，但是只有当一个消息已经被所有 follower 都同步成功返回 ack的时候，这个消息才会被消费者读到。</p>
+<h2 id="5-不重复消费（消费的幂等性）"><a href="#5-不重复消费（消费的幂等性）" class="headerlink" title="5. 不重复消费（消费的幂等性）"></a>5. 不重复消费（消费的幂等性）</h2><p>&emsp;&emsp;所谓消费的幂等性，就是如果同一条消息被消费者重复消费，也能保证数据不出错或者符合业务要求。首先消息的重复消费基本是有可能的，无法完全避免的，虽然消费者会定期告诉ZooKeeper自己已经消费到的消息位置，但是非正常的宕机和重启仍会可能使重复消费问题出现。</p>
+<p>&emsp;&emsp;我们要做的是在业务逻辑层面消除这个影响，也就是说业务逻辑上要考虑重复消息的问题，这个要看场景来说，如果是插入数据库，则可以检查主键；如果是更新数据库则不影响；如果是其他问题，可以为消息设置唯一性id以作特殊处理。</p>
+<h2 id="6-确保消息不丢失"><a href="#6-确保消息不丢失" class="headerlink" title="6. 确保消息不丢失"></a>6. 确保消息不丢失</h2><p>消息的丢失在生产端、MQ端和消费端都要处理：生产端：数据发送给MQ，但是MQ没收到；MQ端：数据已经收到，但是没有持久化就宕机了；消费端：取到了数据，但是还没处理，结果宕机。<br>对于这些情况，我们应当使用ack确认机制，这是一种异步处理方法，就是上一环节要在下一环节给到确认之后才将数据真正地丢弃。</p>
+<h2 id="7-确保消息顺序消费"><a href="#7-确保消息顺序消费" class="headerlink" title="7. 确保消息顺序消费"></a>7. 确保消息顺序消费</h2><p>必须保证顺序消费的场景：数据库操作日志</p>
+<h2 id="8-ElasticSearch"><a href="#8-ElasticSearch" class="headerlink" title="8. ElasticSearch"></a>8. ElasticSearch</h2><h2 id="9-Redis"><a href="#9-Redis" class="headerlink" title="9. Redis"></a>9. Redis</h2><h2 id="10-微服务"><a href="#10-微服务" class="headerlink" title="10. 微服务"></a>10. 微服务</h2><h2 id="11-分布式系统"><a href="#11-分布式系统" class="headerlink" title="11. 分布式系统"></a>11. 分布式系统</h2><h3 id="CAP原则：一致性、可用性、分区容忍性-（三者不可同时满足）"><a href="#CAP原则：一致性、可用性、分区容忍性-（三者不可同时满足）" class="headerlink" title="CAP原则：一致性、可用性、分区容忍性 （三者不可同时满足）"></a>CAP原则：一致性、可用性、分区容忍性 （三者不可同时满足）</h3><ul>
+<li>一致性（Consistency）：多个数据副本能否保持一致</li>
+<li>可用性（Availability）：每次请求都能够响应，但无法保证获取的数据是否最新</li>
+<li>分区容忍性（Partition tolerance）：分区指的是分布式系统中的节点，任意节点故障时系统仍然可以对外提供服务</li>
+</ul>
+<h3 id="分布式一致性协议Raft"><a href="#分布式一致性协议Raft" class="headerlink" title="分布式一致性协议Raft"></a>分布式一致性协议Raft</h3><p>就是保持多副本数据一致性的方法，其两大核心是选主和复制日志。节点有追随者（follower）、候选者（candidate）和领导者（leader）三种角色，只要有一半以上的节点投票就可以选出领导者。复制日志用于维护数据一致性，当leader更新数据后，向follower发送响应，只有follower把信息写入本地，才会向leader返回，超过半数follower反馈成功，就认为更新成功。当有节点因为网路原因数据未更新时，后续以超过半数节点的数据为准。</p>
+<h3 id="一致性哈希算法"><a href="#一致性哈希算法" class="headerlink" title="一致性哈希算法"></a>一致性哈希算法</h3><p>在数据库分库分表、负载均衡和分布式缓存场景下，需要把数据均匀的分散到各个节点上，而且应该保证在增加或减少节点数量时能使得数据的调整较小。</p>
+<p>首先，随机放置是不可取的，因为不稳定也不可复现；另一种是直接对节点个数取模，这样做虽然能保证数据均匀，但是当节点增加或减少时，大部分数据位置都要发生变化，不符合容错性和扩展性的要求。</p>
+<p>而一致性哈希的做法是对K取模（K=2^32-1大概是43亿），也就是将数据的key映射到0~2^32-1之间，我们可以把0到2^32-1这些数字看成一个封闭圆环，我们首先会把节点经过取模映射到这个环上，然后再把数据的key取模映射到这个换上，然后顺时针寻找环上离他最近的那个节点，把数据放到该节点上。这样当增加一个节点时，相当于在圆环上多了一个点，那么对于数据的影响也只限于这个点左边和右边的点之间的那一部分数据，因此影响范围小。</p>
+<p>但是这样仍有一个缺点，那就是2^32-1很大，如果节点数比较少，比如只有2~3个，我们散列之后可能在圆环上不够均匀，对此，我们可以引入虚拟节点的概念，就是把每个节点使用不同的哈希函数映射多次，对应多个圆环上的点，使得这些点能够大概均匀分布，就可以解决这个问题。</p>
+<h3 id="分布式锁-ZooKeeper"><a href="#分布式锁-ZooKeeper" class="headerlink" title="分布式锁 ZooKeeper"></a>分布式锁 ZooKeeper</h3><p>zookeeper是一个分布式协调服务，为分布式应用提供一致性服务，包括配置维护、域名服务、分布式同步、组服务等等。所谓一致性，就是不同节点间的数据同步、互斥资源管理等</p>
+<p>主要特点</p>
+<ul>
+<li>顺序一致性：从同一客户端发起的请求，会严格按照发起顺序应用到zookeeper</li>
+<li>原子性：所有事务的处理在任意一个集群节点上的处理结果是一样的，也就是该事务的成功必然使所有节点均实现了同步。</li>
+<li>单一视图：所有客户端连接获取的服务端数据都是一致的</li>
+<li>可靠性</li>
+<li>实时性</li>
+</ul>
+<p>节点状态</p>
+<ul>
+<li>Looking：寻找leader，该状态会触发选举流程</li>
+<li>Leading：该节点是leader</li>
+<li>following：该节点是follower</li>
+<li>observer：该节点是观察者，不参与投票，只负责同步leader状态</li>
+</ul>
+<p>Watcher</p>
+<p>Session</p>
+<p>选主流程</p>
+<p>当Leader崩溃或者Leader失去大多数的Follower时，Zookeeper处于恢复模式，在恢复模式下需要重新选举出一个新的Leader，让所有的 Server都恢复到一个正确的状态。Zookeeper的选举算法有两种：一种是基于basic paxos实现的，另外一种是基于fast paxos算法实现的。系统默认的选举算法为fast paxos。</p>
+<p>Basic paxos：当前Server发起选举的线程,向所有Server发起询问,选举线程收到所有回复,计算zxid最大Server,并推荐此为Leader，若此提议获得n/2+1票通过（过半同意）,此为Leader，否则重复上述流程，直到Leader选出。</p>
+<p>Fast paxos:某Server首先向所有Server提议自己要成为Leader，当其它Server收到提议以后，解决epoch和 zxid的冲突，并接受对方的提议，然后向对方发送接受提议完成的消息，重复这个流程，最后一定能选举出Leader。(即提议方解决其他所有epoch和 zxid的冲突,即为Leader)。</p>
+<p>数据同步</p>
+<p>当集群重新选举出Leader后，所有的Follower需要和Leader同步数据，确保集群数据的一致性。</p>
+<ul>
+<li>全量同步：主从数据差异过大</li>
+<li>增量同步：数据差异不大</li>
+<li>仅回滚同步：从节点比主节点新，需要回滚从而与主节点同步</li>
+<li>回滚+增量同步：有些更新比主节点快，但有些主节点的更新 从节点没有同步，那就要先回滚再增量</li>
+</ul>
+<h2 id="Spring-Spring-Framework-Spring-Boot-Spring-Cloud"><a href="#Spring-Spring-Framework-Spring-Boot-Spring-Cloud" class="headerlink" title="Spring/Spring Framework/Spring Boot/Spring Cloud"></a>Spring/Spring Framework/Spring Boot/Spring Cloud</h2><p><code>Spring</code>是一个生态体系，包含了Spring Framework、Spring Boot、Spring Cloud等等。</p>
+<p><code>Spring Framework</code>：它是整个Spring生态的基石，是一个轻量级java开发框架，主要为依赖注入、事务管理、Web应用、数据访问提供核心支持。</p>
+<p><code>Spring Boot</code>：Spring Framework虽然接口简化，设计优美，但是它本身不是容器，所以必须依赖于Tomcat等容器，而Spring Boot更简单，集成度更高，信仰约定大于配置，不需要原来繁杂的xml配置，使web应用开发大大简化。</p>
+<p><code>Spring Cloud</code>：它是一整套基于Spring Boot的微服务解决方案，提供了很多组件，如配置管理、注册中心、服务发现、限流、网关、链路追踪等等，它的每一个组件都是基于Spring Boot构建的。但是这些组件很多不是非常成熟，因此各大公司会开发自己的组件，所以说Spring Cloud的更多的是提供了一种设计理念，具体使用时并非必须使用它的组件。</p>
+<p>Tomcat与War包：Tomcat是一个轻量级web应用服务器，在中小型系统和并发访问用户较少的场景下使用。War包是在进行web开发时一个Project下的所有源码的集合，既包含前端HTML、CSS、JS代码，也包含后台Java逻辑。war包生成后可以直接放在tomcat下面的webapps目录下，随着tomcat启动，它可以被自动解压。</p>
+<p>Spring框架的核心技术：依赖注入和面向切面编程</p>
+<ul>
+<li>依赖注入(DI)/控制反转(IoC)</li>
+</ul>
+<p>依赖注入和控制反转描述的是同一件事情，那就是类和类的依赖关系，比如A类要调用B类，那么就要在A类中创建B类的对象，然后进行调用，这样在大规模项目中会使得程序耦合过于紧密，如果要替换这个类，就需要修改所有调用了这个类的代码。IoC和DI就是将这个类的依赖关系解耦，把它们放到Spring框架中去做。那么本来由类控制其所依赖的类的对象的创建，变成了框架控制类对象的创建，这就叫“控制反转”。而从类的使用角度看，是框架创建了对象之后，将这个对象注入到了依赖它的所有的类中，这就是“依赖注入”。</p>
+<ul>
+<li>面向切面编程(AOP)</li>
+</ul>
+<p>Spring Boot多模块应用和Spring Cloud微服务应用的区别</p>
+<p>Spring Boot的单模块和多模块：Spring的多模块指的是一个Project包含多个Module，但是只有最外层的Project被build为Jar包，里面的Module不会被单独打包，而且这些module都是被运行在同一个JVM里面。而Spring Cloud中的组件是可以独立打包成为Jar包的，而且他们可以运行在不同的JVM里，如果使用容器部署，他们在不同的docker容器中，也就是有可能运行在不同的物理机上，这就是微服务，组件之间的调用是跨JVM的，一般通过http通信。微服务的优点是错误隔离、容易监控、定点扩缩容。占用资源的服务被单独拿出来，可以分配更多的资源，满足其需求。微服务的拆分要参考很多因素（技术、组织、产品等等），总之原则是架构清晰、开发方便、部署简单、维护容易。</p>
+<p>Spring的6个特征</p>
+<ul>
+<li>核心技术：依赖注入DI、面向切面编程AOP、事件Events、资源Resource、i18n、验证、数据绑定、类型转换</li>
+<li>测试：模拟对象、TestContext框架、Spring MVC测试、WebTestClient</li>
+<li>数据访问：事务、DAO支持、JDBC、ORM、编组XML</li>
+<li>Web知识：Spring MVC和Spring WebFlux Web框架</li>
+<li>集成：远程处理、JMS、JCA、JMX、电子邮件、任务、调度、缓存</li>
+<li>语言：Kotlin、Groovy、动态语言</li>
+</ul>
+<h2 id="JVM虚拟机"><a href="#JVM虚拟机" class="headerlink" title="JVM虚拟机"></a>JVM虚拟机</h2>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/06/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%8E%92%E5%BA%8F%E7%B3%BB%E5%88%97/" rel="next" title="数据结构之排序">
+                <i class="fa fa-chevron-left"></i> 数据结构之排序
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="IronQin" />
+            
+              <p class="site-author-name" itemprop="name">IronQin</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/qwbjtu2015" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:qwbjtu15@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-什么是消息队列"><span class="nav-number">1.</span> <span class="nav-text">1. 什么是消息队列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-应用场景"><span class="nav-number">2.</span> <span class="nav-text">2. 应用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-常见消息队列优缺点"><span class="nav-number">3.</span> <span class="nav-text">3. 常见消息队列优缺点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-高可用的实现方式"><span class="nav-number">4.</span> <span class="nav-text">4. 高可用的实现方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-RabbitMQ"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 RabbitMQ</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-Kafka"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 Kafka</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-不重复消费（消费的幂等性）"><span class="nav-number">5.</span> <span class="nav-text">5. 不重复消费（消费的幂等性）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-确保消息不丢失"><span class="nav-number">6.</span> <span class="nav-text">6. 确保消息不丢失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-确保消息顺序消费"><span class="nav-number">7.</span> <span class="nav-text">7. 确保消息顺序消费</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-ElasticSearch"><span class="nav-number">8.</span> <span class="nav-text">8. ElasticSearch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-Redis"><span class="nav-number">9.</span> <span class="nav-text">9. Redis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-微服务"><span class="nav-number">10.</span> <span class="nav-text">10. 微服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-分布式系统"><span class="nav-number">11.</span> <span class="nav-text">11. 分布式系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CAP原则：一致性、可用性、分区容忍性-（三者不可同时满足）"><span class="nav-number">11.1.</span> <span class="nav-text">CAP原则：一致性、可用性、分区容忍性 （三者不可同时满足）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分布式一致性协议Raft"><span class="nav-number">11.2.</span> <span class="nav-text">分布式一致性协议Raft</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一致性哈希算法"><span class="nav-number">11.3.</span> <span class="nav-text">一致性哈希算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分布式锁-ZooKeeper"><span class="nav-number">11.4.</span> <span class="nav-text">分布式锁 ZooKeeper</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Spring-Framework-Spring-Boot-Spring-Cloud"><span class="nav-number">12.</span> <span class="nav-text">Spring&#x2F;Spring Framework&#x2F;Spring Boot&#x2F;Spring Cloud</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM虚拟机"><span class="nav-number">13.</span> <span class="nav-text">JVM虚拟机</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">IronQin</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'A4xJ0gMfTQNSOhBKBVAPYmJ4-gzGzoHsz',
+        appKey: 'WL7KU6T9csIghQLuHXPgDKNo',
+        placeholder: '有什么想说的~',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh_Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,工具," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="使用Python语言调用Google翻译和百度翻译在线API接口，对文本进行翻译">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在线翻译API调用">
+<meta property="og:url" content="https://qwbjtu2015.github.io/2020/10/26/%E5%9C%A8%E7%BA%BF%E7%BF%BB%E8%AF%91API%E8%B0%83%E7%94%A8/index.html">
+<meta property="og:site_name" content="IronQin&#39;s Blog">
+<meta property="og:description" content="使用Python语言调用Google翻译和百度翻译在线API接口，对文本进行翻译">
+<meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/translate/baidu-translate.png">
+<meta property="article:published_time" content="2020-10-26T12:04:06.000Z">
+<meta property="article:modified_time" content="2020-10-26T13:48:31.652Z">
+<meta property="article:author" content="IronQin">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="工具">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://qwbjtu2015.github.io/images/posts/translate/baidu-translate.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://qwbjtu2015.github.io/2020/10/26/在线翻译API调用/"/>
+
+
+
+
+
+  <title>在线翻译API调用 | IronQin's Blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh_Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IronQin's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-首页">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-标签">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-分类">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-归档">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-inbox"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-关于">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://qwbjtu2015.github.io/2020/10/26/%E5%9C%A8%E7%BA%BF%E7%BF%BB%E8%AF%91API%E8%B0%83%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="IronQin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IronQin's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">在线翻译API调用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-10-26T04:04:06-08:00">
+                2020-10-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/10/26/%E5%9C%A8%E7%BA%BF%E7%BF%BB%E8%AF%91API%E8%B0%83%E7%94%A8/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/10/26/%E5%9C%A8%E7%BA%BF%E7%BF%BB%E8%AF%91API%E8%B0%83%E7%94%A8/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  使用Python语言调用Google翻译和百度翻译在线API接口，对文本进行翻译
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;项目开发过程中，需要将英文文本翻译为中文，由于对翻译质量的要求并不严格，因此考虑使用百度和谷歌的在线翻译接口进行处理。本文以Python语言为例，介绍使用示例。</p>
+<h2 id="1-谷歌翻译"><a href="#1-谷歌翻译" class="headerlink" title="1 谷歌翻译"></a>1 谷歌翻译</h2><p>&emsp;&emsp;Google官方示例推荐使用google-cloud-translate库来进行Python调用，但该方法需要配置用户Key，比较复杂；这里我们使用<code>googletrans</code>库，它封装了谷歌翻译接口，可以实现免费、无限制地调用谷歌翻译接口。</p>
+<h3 id="1-1-安装googletrans"><a href="#1-1-安装googletrans" class="headerlink" title="1.1 安装googletrans"></a>1.1 安装googletrans</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install googletrans</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-调用接口"><a href="#1-2-调用接口" class="headerlink" title="1.2 调用接口"></a>1.2 调用接口</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> googletrans <span class="keyword">import</span> Translator</span><br><span class="line"></span><br><span class="line">text = <span class="string">"I am a student."</span></span><br><span class="line">translator = Translator(service_urls=[<span class="string">'translate.google.cn'</span>])</span><br><span class="line"><span class="comment"># text为待翻译文本，src是源语言，dest是目标语言 （auto参数值指的是自动识别语言类型）</span></span><br><span class="line">trans = translator.translate(text, src=<span class="string">'auto'</span>, dest=<span class="string">'zh-cn'</span>)</span><br><span class="line">print(trans.origin, trans.text)</span><br><span class="line"><span class="comment"># I am a student. 我是学生。</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-3-语种检测"><a href="#1-3-语种检测" class="headerlink" title="1.3 语种检测"></a>1.3 语种检测</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">detection=translator.detect(<span class="string">'I am a student.'</span>)</span><br><span class="line">print(detection.lang)</span><br><span class="line"><span class="comment"># en</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-4-语种缩写对应关系"><a href="#1-4-语种缩写对应关系" class="headerlink" title="1.4 语种缩写对应关系"></a>1.4 语种缩写对应关系</h3><p>参考<a href="https://cloud.google.com/translate/docs/languages" target="_blank" rel="noopener">官网列表</a></p>
+<p>常见语种：</p>
+<ul>
+<li>中文简体： zh或zh-CN</li>
+<li>中文繁体： zh-TW</li>
+<li>英语： en</li>
+<li>法语： fr</li>
+<li>德语： de</li>
+<li>日语： ja</li>
+<li>韩语： ko</li>
+</ul>
+<h2 id="2-百度翻译"><a href="#2-百度翻译" class="headerlink" title="2 百度翻译"></a>2 百度翻译</h2><p>&emsp;&emsp;百度翻译同样提供了Python版本的在线翻译接口和示例程序。 翻译接口的标准版可以免费试用，高级版需要付费，其中免费的基础版本限制调用频率（每秒最多调用一次）。</p>
+<h3 id="2-1-申请ID和密钥"><a href="#2-1-申请ID和密钥" class="headerlink" title="2.1 申请ID和密钥"></a>2.1 申请ID和密钥</h3><p>&emsp;&emsp;登录<a href="https://api.fanyi.baidu.com/" target="_blank" rel="noopener">百度翻译开放平台</a>，注册成为开发者，获得APPID；然后开通翻译API服务。</p>
+<h3 id="2-2-API调用"><a href="#2-2-API调用" class="headerlink" title="2.2 API调用"></a>2.2 API调用</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> http.client</span><br><span class="line"><span class="keyword">import</span> hashlib</span><br><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line">appid = <span class="string">''</span>  <span class="comment"># 填写你的appid</span></span><br><span class="line">secretKey = <span class="string">''</span>  <span class="comment"># 填写你的密钥</span></span><br><span class="line"></span><br><span class="line">httpClient = <span class="literal">None</span></span><br><span class="line">myurl = <span class="string">'/api/trans/vip/translate'</span></span><br><span class="line"></span><br><span class="line">fromLang = <span class="string">'auto'</span>   <span class="comment">#原文语种</span></span><br><span class="line">toLang = <span class="string">'zh'</span>   <span class="comment">#译文语种</span></span><br><span class="line">salt = random.randint(<span class="number">32768</span>, <span class="number">65536</span>)</span><br><span class="line">q= <span class="string">'apple'</span></span><br><span class="line">sign = appid + q + str(salt) + secretKey</span><br><span class="line">sign = hashlib.md5(sign.encode()).hexdigest()</span><br><span class="line">myurl = myurl + <span class="string">'?appid='</span> + appid + <span class="string">'&amp;q='</span> + urllib.parse.quote(q) + <span class="string">'&amp;from='</span> + fromLang + <span class="string">'&amp;to='</span> + toLang + <span class="string">'&amp;salt='</span> + str(</span><br><span class="line">salt) + <span class="string">'&amp;sign='</span> + sign</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    httpClient = http.client.HTTPConnection(<span class="string">'api.fanyi.baidu.com'</span>)</span><br><span class="line">    httpClient.request(<span class="string">'GET'</span>, myurl)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># response是HTTPResponse对象</span></span><br><span class="line">    response = httpClient.getresponse()</span><br><span class="line">    result_all = response.read().decode(<span class="string">"utf-8"</span>)</span><br><span class="line">    result = json.loads(result_all)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">print</span> (result)</span><br><span class="line"></span><br><span class="line"><span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">    <span class="keyword">print</span> (e)</span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">    <span class="keyword">if</span> httpClient:</span><br><span class="line">        httpClient.close()</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-语种缩写对应关系"><a href="#2-3-语种缩写对应关系" class="headerlink" title="2.3 语种缩写对应关系"></a>2.3 语种缩写对应关系</h3><p><img src="/images/posts/translate/baidu-translate.png" alt="fig 1"></p>
+<p>完整列表参考<a href="https://api.fanyi.baidu.com/doc/21" target="_blank" rel="noopener">文档</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag"># 工具</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/27/Dataverse%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8/" rel="next" title="Dataverse安装与使用">
+                <i class="fa fa-chevron-left"></i> Dataverse安装与使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/10/26/Hexo%E5%8F%91%E5%B8%83%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0/" rel="prev" title="Hexo发布博客文章">
+                Hexo发布博客文章 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="IronQin" />
+            
+              <p class="site-author-name" itemprop="name">IronQin</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/qwbjtu2015" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:qwbjtu15@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-谷歌翻译"><span class="nav-number">1.</span> <span class="nav-text">1 谷歌翻译</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-安装googletrans"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 安装googletrans</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-调用接口"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 调用接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-语种检测"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 语种检测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-语种缩写对应关系"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 语种缩写对应关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-百度翻译"><span class="nav-number">2.</span> <span class="nav-text">2 百度翻译</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-申请ID和密钥"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 申请ID和密钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-API调用"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 API调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-语种缩写对应关系"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 语种缩写对应关系</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">IronQin</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'A4xJ0gMfTQNSOhBKBVAPYmJ4-gzGzoHsz',
+        appKey: 'WL7KU6T9csIghQLuHXPgDKNo',
+        placeholder: '有什么想说的~',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

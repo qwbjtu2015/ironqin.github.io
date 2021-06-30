@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh_Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="数据结构," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="介绍数据结构中几种常见的树，包括B树、B+树、平衡树、查找树、红黑树等等，详细介绍他们的特点和使用场景，并做简易实现。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据结构之树">
+<meta property="og:url" content="https://qwbjtu2015.github.io/2021/05/31/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%91%E7%B3%BB%E5%88%97/index.html">
+<meta property="og:site_name" content="IronQin&#39;s Blog">
+<meta property="og:description" content="介绍数据结构中几种常见的树，包括B树、B+树、平衡树、查找树、红黑树等等，详细介绍他们的特点和使用场景，并做简易实现。">
+<meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/DS/B-tree-delete-example.png">
+<meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/DS/B+tree-structure.png">
+<meta property="article:published_time" content="2021-05-31T12:52:06.000Z">
+<meta property="article:modified_time" content="2021-06-01T12:22:41.223Z">
+<meta property="article:author" content="IronQin">
+<meta property="article:tag" content="数据结构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://qwbjtu2015.github.io/images/posts/DS/B-tree-delete-example.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://qwbjtu2015.github.io/2021/05/31/数据结构-树系列/"/>
+
+
+
+
+
+  <title>数据结构之树 | IronQin's Blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh_Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IronQin's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-首页">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-标签">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-分类">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-归档">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-inbox"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-关于">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://qwbjtu2015.github.io/2021/05/31/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%91%E7%B3%BB%E5%88%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="IronQin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IronQin's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">数据结构之树</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-05-31T20:52:06+08:00">
+                2021-05-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/31/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%91%E7%B3%BB%E5%88%97/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/31/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%91%E7%B3%BB%E5%88%97/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  介绍数据结构中几种常见的树，包括B树、B+树、平衡树、查找树、红黑树等等，详细介绍他们的特点和使用场景，并做简易实现。
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-树结构"><a href="#1-树结构" class="headerlink" title="1 树结构"></a>1 树结构</h2><p>&emsp;&emsp;树是数据结构中非常常见的一种，其中以二叉树应用最广泛。树结构可以表达或描述层级信息，如组织结构；同时树的结构特点使其天然具有索引优势，因为每个子节点的选择过程都是在缩小查找的范围，因此树被广泛应用于各类系统中。</p>
+<p>&emsp;&emsp;树按照子节点个数分为二叉树和多叉树，主要有二叉搜索树（二分查找）、平衡二叉树、红黑树、堆、B树。</p>
+<h2 id="2-B树"><a href="#2-B树" class="headerlink" title="2 B树"></a>2 B树</h2><p>&emsp;&emsp;B树也叫B-树，本质上是一种多叉平衡查找树，多叉意味着子节点个数大于2，平衡意味着它的子树间的深度相差不大，查找树意味着它的节点是有序的。对于一个多叉查找树而言，如果子节点和父节点之间有先后关系，那么意味着父节点中不能只有一个值，因为一个值只能表达两个范围，即x_左 &lt; x_parent, x_右 &gt; x_parent。如果一个B树父节点有m个子节点，那么父节点中最少包含m-1个key。我们把这里的m称为B树的阶数。</p>
+<h3 id="2-1-B树特点"><a href="#2-1-B树特点" class="headerlink" title="2.1 B树特点"></a>2.1 B树特点</h3><p>总结一个m阶的B树所具备的特点如下：</p>
+<ul>
+<li>每个节点最多有m-1个key</li>
+<li>根节点最少有一个key</li>
+<li>非根节点至少有m/2个key</li>
+<li>每个节点中的key按照从小到大排序，每个key的左子树中的key &lt; key &lt; 右子树中的key</li>
+<li>所有叶子节点都在同一层，所有叶子节点都是空节点，有0个key</li>
+<li>每个节点都存有索引和数据，也就是key和value</li>
+</ul>
+<blockquote>
+<p>注：上述特点中的第三条：非根节点最少有m/2个key，如果少于这个值，就意味着可以子节点合并、或者父节点调整。</p>
+</blockquote>
+<h3 id="2-2-B树的操作"><a href="#2-2-B树的操作" class="headerlink" title="2.2 B树的操作"></a>2.2 B树的操作</h3><h4 id="2-2-1-查询"><a href="#2-2-1-查询" class="headerlink" title="2.2.1 查询"></a>2.2.1 查询</h4><p>&emsp;&emsp; B树的查询比较简单，从根节点开始，依次比较节点中的key与target的大小，从而找到下一个应该查找的子节点，直到找到target或走到叶节点仍未查找到。</p>
+<h4 id="2-2-2-插入"><a href="#2-2-2-插入" class="headerlink" title="2.2.2 插入"></a>2.2.2 插入</h4><p>&emsp;&emsp;类似于平衡二叉树的插入删除，B树的插入和删除操作也需要一些结构调整，如节点合并、节点修改等等。若B树不存在某key,则一定是在叶子结点（空节点）的父节点中进行插入操作。</p>
+<p><strong>插入操作总原则</strong>：</p>
+<ul>
+<li>根据要插入的key的值，找到叶子判断当前结点key的个数是否小于等于m-1，若满足则结束，否则进行第3步</li>
+<li>如果不满足，使用节点中间位置的key值将key分为左右两个部分，把中间节点放到自己的父节点中去，如果父节点也已经满了的话，左右两个子节点放置左右部分的key。</li>
+<li>以结点中间的key为中心分裂成左右两部分，然后将这个中间的key插入到父结点中，这个key的左子树指向分裂后的左半部分，这个key的右子支指向分裂后的右半部分，然后将当前结点指向父结点，继续进行第3步。</li>
+</ul>
+<blockquote>
+<p>注1: 在上述第三步，一直向上父节点进位过程中，如果传导到根节点使得根节点中key的数量超过m-1，则需要将根节点一分为二，生成新的根节点。</p>
+<p>注2: 当阶数m为偶数时，需要分裂时就不存在排序恰好在中间的key，那么我们选择中间位置的前一个key或中间位置的后一个key为中心进行分裂即可。</p>
+</blockquote>
+<p>&emsp;&emsp;例子可以参考博客<a href="https://www.cnblogs.com/nullzx/p/8729425.html" target="_blank" rel="noopener">B树和B+树的插入、删除图文详解</a></p>
+<h4 id="2-2-3-删除"><a href="#2-2-3-删除" class="headerlink" title="2.2.3 删除"></a>2.2.3 删除</h4><p>删除操作总原则：</p>
+<ul>
+<li>如果要删除的节点位于最下层非空节点，删除之后如果该节点key数量仍然大于等于m/2，那么结束</li>
+<li>否则向该节点的左右兄弟借一个节点，前提是左右兄弟只要有任意一个key的数量超过m/2，否则的话转下一步</li>
+<li>选择左兄弟或右兄弟合并，同时将对应的父节点中的key也拿下来，因为子节点合并了，所以父节点的key也需要减少一个。这里还要检查父节点数量是否满足条件，如果不满足，仍然要进行调整，可以选择向兄弟节点借，如果没得借就需要两个兄弟合并，同时拿下一个父亲key，循环该步骤，直到满足条件。</li>
+<li>如果要删除的节点不是最下层非空节点，首先删除该key，然后将该key的下一个key从叶节点中提上来替换该位置（注意这个key一定是在叶节点上的），然后去叶节点查看是否满足最小数量要求，满足即停止，不满足则要上1、2步重新调整。</li>
+</ul>
+<blockquote>
+<p>注：B树高度的下降仅发生在根节点被合并时</p>
+</blockquote>
+<p><img src="/images/posts/DS/B-tree-delete-example.png" alt="Fig1" title="B树删除叶节点"></p>
+<p>如图1所示，如果要删除根节点33，我们需要将33的下一个key，也就是34替换到根节点位置，然后再检查34原来所在的叶节点是否满足数量要求，由于m=5,该节点只剩下1个key，不满足条件，因此我们要把它和它的兄弟节点合并，也就是35/39/40以及父节点中的36一同合并为一个节点，此时父节点变成了41，它不满足最小为2的条件了，我们可以让它向自己的兄弟节点借一个，也就是把左兄弟的30放到根节点上去，然后把根节点的34拿到自己这里来，注意这时原来的30右边的31和32也被一并挪到了34的左子树上。这个向兄弟借节点其实就是原来平衡二叉树的旋转操作。</p>
+<p>这里比较复杂，可以参考博客<a href="https://github.com/julycoding/The-Art-Of-Programming-By-July/blob/master/ebook/zh/03.02.md" target="_blank" rel="noopener">B树操作讲解</a></p>
+<h2 id="3-B-树"><a href="#3-B-树" class="headerlink" title="3 B+树"></a>3 B+树</h2><h3 id="3-1-B-树的特点"><a href="#3-1-B-树的特点" class="headerlink" title="3.1 B+树的特点"></a>3.1 B+树的特点</h3><p>&emsp;&emsp;B+树与B树非常相似，我们整理它们的相同点和不同点</p>
+<p>相同点：</p>
+<ul>
+<li>根节点都是至少一个元素</li>
+<li>非根节点key的数量都是m/2 &lt;= k &lt;= m-1 (m是阶数)</li>
+</ul>
+<p>不同点：</p>
+<ul>
+<li>B+树节点分为内部节点和叶子节点，也叫索引节点和数据节点，顾名思义，内部节点值存储索引，不包含数据，所有数据全部放在最下层叶子节点上</li>
+<li>每个叶子节点都存储着它右边相邻叶子节点的志臻，也就是所有叶节点组成一个链表，叶子节点中的key也按照大小排序</li>
+<li>对于父节点中的一个key而言，它的左树中的所有key都小于它，右树中的所有key都<strong>大于等于</strong>它</li>
+<li>根节点既可以是内部节点，也可以是叶子节点</li>
+</ul>
+<p><img src="/images/posts/DS/B+tree-structure.png" alt="Fig2" title="B+树结构"></p>
+<h3 id="3-2-B-树的操作"><a href="#3-2-B-树的操作" class="headerlink" title="3.2 B+树的操作"></a>3.2 B+树的操作</h3><p>&emsp;&emsp;B+树的操作与B树总体上是相似的，只是在叶子节点分裂和内部节点分裂时有所不同，叶子节点的分裂，需要在叶子上保留分裂的中间key，而内部节点分裂时则不需要，这是因为数据必须全部在叶子上，不能在内部节点中。</p>
+<p>时间复杂度</p>
+<p>&emsp;&emsp;B树和B+树的查询时间复杂度都是O(log_m N)，也就是树的高度</p>
+<p>&emsp;&emsp;例子可以参考博客<a href="https://www.cnblogs.com/nullzx/p/8729425.html" target="_blank" rel="noopener">B树和B+树的插入、删除图文详解</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag"># 数据结构</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/05/18/Java%E5%AD%A6%E4%B9%A0-MySQL/" rel="next" title="Java学习(六)-MySQL数据库">
+                <i class="fa fa-chevron-left"></i> Java学习(六)-MySQL数据库
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/06/07/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98/" rel="prev" title="数据结构之背包问题">
+                数据结构之背包问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="IronQin" />
+            
+              <p class="site-author-name" itemprop="name">IronQin</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/qwbjtu2015" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:qwbjtu15@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-树结构"><span class="nav-number">1.</span> <span class="nav-text">1 树结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-B树"><span class="nav-number">2.</span> <span class="nav-text">2 B树</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-B树特点"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 B树特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-B树的操作"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 B树的操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-1-查询"><span class="nav-number">2.2.1.</span> <span class="nav-text">2.2.1 查询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-2-插入"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.2.2 插入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-3-删除"><span class="nav-number">2.2.3.</span> <span class="nav-text">2.2.3 删除</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-B-树"><span class="nav-number">3.</span> <span class="nav-text">3 B+树</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-B-树的特点"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 B+树的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-B-树的操作"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 B+树的操作</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">IronQin</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'A4xJ0gMfTQNSOhBKBVAPYmJ4-gzGzoHsz',
+        appKey: 'WL7KU6T9csIghQLuHXPgDKNo',
+        placeholder: '有什么想说的~',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

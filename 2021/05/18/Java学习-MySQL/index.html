@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh_Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="面试,Java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="MySQL数据库">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java学习(六)-MySQL数据库">
+<meta property="og:url" content="https://qwbjtu2015.github.io/2021/05/18/Java%E5%AD%A6%E4%B9%A0-MySQL/index.html">
+<meta property="og:site_name" content="IronQin&#39;s Blog">
+<meta property="og:description" content="MySQL数据库">
+<meta property="article:published_time" content="2021-05-18T14:06:06.000Z">
+<meta property="article:modified_time" content="2021-06-28T14:13:10.379Z">
+<meta property="article:author" content="IronQin">
+<meta property="article:tag" content="面试">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://qwbjtu2015.github.io/2021/05/18/Java学习-MySQL/"/>
+
+
+
+
+
+  <title>Java学习(六)-MySQL数据库 | IronQin's Blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh_Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">IronQin's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-首页">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-标签">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-分类">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-归档">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-inbox"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-关于">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://qwbjtu2015.github.io/2021/05/18/Java%E5%AD%A6%E4%B9%A0-MySQL/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="IronQin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IronQin's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java学习(六)-MySQL数据库</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-05-18T22:06:06+08:00">
+                2021-05-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/18/Java%E5%AD%A6%E4%B9%A0-MySQL/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/18/Java%E5%AD%A6%E4%B9%A0-MySQL/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  MySQL数据库
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <ol>
+<li>关系型数据库（SQL）：MySQL，Oracle，SQLServer，SQLite，行和列</li>
+<li>非关系型数据库（NoSQL-&gt;not only SQL）：Redis，MongoDB，对象存储，通过对象自身的属性来决定</li>
+<li>MySQL:RDBMS 关系型数据库管理系统，体积小、速度快，目前支持集群，因此可以应用在大型网站中。</li>
+<li>行内注释 –</li>
+<li>数据库基础语句<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> db; <span class="comment">-- 切换数据库</span></span><br><span class="line"><span class="keyword">show</span> <span class="keyword">tables</span>; <span class="comment">-- 查看数据库中的表</span></span><br><span class="line"><span class="keyword">describe</span> table_name; <span class="comment">-- 查看表结构</span></span><br><span class="line"><span class="keyword">create</span> <span class="keyword">database</span> <span class="keyword">if</span> <span class="keyword">not</span> <span class="keyword">exists</span> db_test <span class="comment">-- 创建数据库</span></span><br><span class="line"><span class="keyword">drop</span> <span class="keyword">database</span> <span class="keyword">if</span> <span class="keyword">exists</span> db_test <span class="comment">-- 删除数据库</span></span><br></pre></td></tr></table></figure></li>
+<li>MySQL数据结构<br>tinyint|| 1字节 || 十分小的数据 ||<br>tinyint| 2字节 | 较小的数据 ||<br>mediumint | 3字节 |中等大小的数据|<br>int | 4字节 |标准整数|<br>bigint | 4字节 |较大的数据|<br>float<br>double<h1 id="decimal"><a href="#decimal" class="headerlink" title="decimal"></a>decimal</h1></li>
+<li>数据查询语言Select<ul>
+<li>Select 字段 From 表名</li>
+<li>select <code>field1</code> as <code>字段1</code>, <code>field2</code> as <code>字段2</code> from 表名 as a</li>
+<li>concat(a, b) 字符串拼接</li>
+<li>按照字段去重： select distinct 字段1 from 表名</li>
+<li>数据库表达式：文本值、列、Null、函数、计算表达式、系统变量</li>
+<li>where子句 and/&amp;&amp; or/|| not/!</li>
+<li>is null / is not null / between x and y</li>
+<li>模糊查询like / in  %代表0至任意个字符， <em>表示一个字符 “刘%” “刘\</em>“</li>
+<li>where x in (1001,1002,1003) </li>
+<li>表连接<ul>
+<li>内连接 select f1,f2 from ta inner join tb on ta.f1=tb.f1</li>
+<li>左连接 select f1,f2 from ta left join tb on ta.f1=tb.f1</li>
+<li>右连接 select f1,f2 from ta right join tb on ta.f1=tb.f1</li>
+<li>全连接 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>语句集合<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> [<span class="keyword">all</span> | <span class="keyword">distinct</span>]</span><br><span class="line">&#123;* | table.* | [table.field1 [<span class="keyword">as</span> alias1] [,table.field2 [<span class="keyword">as</span> alias2]][,...]]&#125;</span><br><span class="line"><span class="keyword">from</span> table_name [<span class="keyword">as</span> table_alias]</span><br><span class="line">    [<span class="keyword">left</span> | <span class="keyword">right</span> | <span class="keyword">inner</span> <span class="keyword">join</span> table_name2] <span class="comment">--联合查询</span></span><br><span class="line">    [<span class="keyword">where</span> ...] <span class="comment">--指定结果需要满足的条件</span></span><br><span class="line">    [<span class="keyword">group</span> <span class="keyword">by</span> ...] <span class="comment">-- 按照一个或多个字段分组</span></span><br><span class="line">    [<span class="keyword">having</span>] <span class="comment">-- 按照条件过滤分组结果</span></span><br><span class="line">    [<span class="keyword">order</span> <span class="keyword">by</span> ...] <span class="comment">-- 指定查询结果按照一个或多个字段排序</span></span><br><span class="line">    [<span class="keyword">limit</span> &#123;[<span class="keyword">offset</span>,]<span class="keyword">row_count</span> | <span class="keyword">row_count</span> <span class="keyword">offset</span>&#125;]; <span class="comment">--指定查询的记录从哪条到哪条</span></span><br></pre></td></tr></table></figure></li>
+<li>数据库事务<ul>
+<li>事务：将一组SQL放在一起执行</li>
+<li>事务的四个特性ACID：原子性、一致性、隔离性（事务）、持久性<ul>
+<li>原子性：要么都成功。要么都失败</li>
+<li>一致性：事务执行前后的数据完整性要保持一致</li>
+<li>隔离性：多个用户并发访问时，事务的执行互相隔离，不受影响</li>
+<li>持久性：（事务结束后的数据不随外界原因导致数据丢失）</li>
+</ul>
+</li>
+<li>隔离性导致的问题：<ul>
+<li>脏读：一个事务读取了另一个事务没有提交的数据</li>
+<li>不可重复读：在一个事务内，前后读取的某一行数据内容不一致（在事务执行期间有其他线程修改了这一行数据）：针对update</li>
+<li>幻读：在一个事务执行过程中，有其他线程插入了新数据，导致前后数据条数不一致，针对insert</li>
+</ul>
+</li>
+<li>四种隔离级别<ul>
+<li>读未提交：不加任何限制，不安全</li>
+<li>读提交：解决脏读问题（就是一个事务只能读到其他事务commit之后的数据）</li>
+<li>可重复读（默认级别）：解决脏读和不可重复读问题</li>
+<li>串行化：解决上述三个问题，因为强行改为单线程，效率极差</li>
+</ul>
+</li>
+<li>MySQL实现方法<ul>
+<li>读未提交：不加任何锁，不适用于多线程</li>
+<li>读提交：MVVC：每个select语句给一个版本，语句执行完即失效。</li>
+<li>可重复读：MVVC（多版本并发控制）：每个事务一开始，就申请一个按照时间递增的唯一性ID，这个ID可以看做数据的版本，</li>
+<li>串行化：读的时候加共享锁，其他人也可以读，写的时候加排它锁，其他人既不能读也不能写</li>
+<li>并发写：一个线程在写入或修改一条数据时，数据库会对这条数据加行锁（前提是查询字段上建立了索引，否则就是表锁），只有该修改提交之后才会释放。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>事务<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> autocommit=<span class="number">0</span></span><br><span class="line"><span class="keyword">start</span> <span class="keyword">transaction</span></span><br><span class="line"><span class="keyword">insert</span> ***</span><br><span class="line"><span class="keyword">insert</span> ***</span><br><span class="line"><span class="keyword">commit</span></span><br><span class="line"><span class="keyword">rollback</span></span><br><span class="line"><span class="keyword">set</span> autocommit=<span class="number">1</span></span><br><span class="line"><span class="keyword">savepoint</span> <span class="comment">-- 设置一个保存点</span></span><br><span class="line"><span class="keyword">rollback</span> <span class="keyword">to</span> <span class="keyword">savepoint</span> <span class="comment">-- 回滚到保存点</span></span><br><span class="line"><span class="keyword">release</span> <span class="keyword">savepoint</span> <span class="comment">-- 撤销保存点</span></span><br></pre></td></tr></table></figure></li>
+<li>索引<br>索引可以帮助MySQL高效获取数据的数据结构<ul>
+<li>索引分类<ul>
+<li>主键索引：一个表中只能有一个主键索引</li>
+<li>唯一索引：字段值不可重复，一个表可以多个唯一索引</li>
+<li>常规索引：默认索引，仅用于快速查询数据</li>
+<li>全文索引：下单独介绍</li>
+</ul>
+</li>
+<li>全文索引<ul>
+<li>MySQL5.6之前只在MyISAM引擎下支持，5.6之后全部支持</li>
+<li>字段类型为char/varchar/text才能建全文索引</li>
+<li>全文索引能按照某些关键字匹配查询，快速过滤数据，比like语句支持的模糊查询更快、更灵活</li>
+<li>最小搜索长度和最大搜索长度：只有在两个长度之间的字符串才会被索引，MyISAM默认是4和84，InnoDB默认是3和84，可以自行修改</li>
+<li>两种模式：自然语言模式和布尔模式：自然语言就是默认的全文检索，布尔则是用多个关键词之间的与、或、非关系来复杂查询</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>MySQL中B+树索引和Hash索引以及B树索引的区别和优劣</li>
+</ol>
+<p>&emsp;&emsp;MySQL中的InnoDB引擎使用B+树作为索引结构，Hash索引的优势是单条数据查询速度快，O(1)复杂度，但不适用于范围查询，需要遍历全表，性能较差；至于B树和B+树的区别，我们则要知道：在大型数据库中，它的索引和数据都是存储在磁盘上而非内存中，而磁盘IO的时间消耗极大，约在10ms数量级，因此需要极力减少磁盘IO的次数；此外，实际应用中B树或者B+树的阶数一般是一个操作系统内存页可以存储的索引或数据的最大数量，也就是说一个内存页存储一个B树节点，这样在进行一个范围查找操作时，如果数据位于不同节点上则需要多次随机磁盘IO，但如果是B+树，那么只要找到了起始数据节点的位置，则可以通过节点间的指针快速找到下一节点的位置，顺序IO要比随机IO快得多。</p>
+<p>&emsp;&emsp;在实际应用系统中，高度为3的B+树就能存储千万级别的数据，而最高也就是4或5，所以B+树高度带来的复杂度几乎可以忽略不计。一般情况下大表的索引会缓存在内存中。</p>
+<p>&emsp;&emsp;补充： B树和B+树的根本区别不是叶子节点之间的指针，即使给B树叶子节点加上指针也是不行的，原因在于B树将数据放在非叶节点上，在树插入和删除过程中节点旋转时就不能保证B树的节点保存在一段连续的区块内，而B+树在做旋转操作时，并没有影响到最下层叶子节点的位置，保证了数据物理上的连续性。</p>
+<ol start="13">
+<li>主键索引和非主键索引的区别</li>
+</ol>
+<p>&emsp;&emsp;通过主键索引查询时，直接就可以查到数据所在的位置，而通过非主键索引查询时，第一次查到的是该索引对应的主键值，然后在通过这个主键值查询主键索引，最后得到数据，这个过程也叫作回表。</p>
+<ol start="14">
+<li>为什么建议主键索引设置自增属性</li>
+</ol>
+<p>&emsp;&emsp;因为数据库中的数据存储是按照主键ID大小依次存储的，如果不是自增的话，当插入一个比现在ID小的新数据时，则需要将这个数据插入到前面去，如果遇到B+树叶子节点正好用满，则涉及大量的数据移动操作，因此一般设置自增，缩减数据插入时间。</p>
+<ol start="15">
+<li><p>如何提高索引命中率</p>
+<ul>
+<li>如果where中有or关键词，即使条件带索引也不会使用，如果要使用or，需要将or条件中的每个列都加上索引</li>
+<li>对于多列索引，不是使用的第一列就不会使用索引</li>
+<li>如果列类型是字符串，需要在条件中将数据使用引号引用起来，否则不使用索引</li>
+<li>如果MySQL估计使用全表扫描比使用索引快，则不使用索引</li>
+</ul>
+</li>
+<li><p>分库分表重点</p>
+</li>
+</ol>
+<p>（1）分库分表的方式有哪些？分别主要解决什么问题？</p>
+<p>通常一张表存储500万数据，超过后应该考虑分表。</p>
+<p>&emsp;&emsp;水平切分：主要解决单表过大造成的性能问题，单表过大造成的单服务器空间问题</p>
+<p>&emsp;&emsp;垂直切分：解决表鱼鳔之间资源争用问题，锁争用几率小，实现核心与非核心的分级存储</p>
+<ol start="12">
+<li>分析SQL执行状况<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">explain</span> <span class="keyword">select</span> * <span class="keyword">from</span> student; <span class="comment">--</span></span><br><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> student <span class="keyword">where</span> <span class="keyword">match</span>(studentName) against(<span class="string">'刘'</span>); <span class="comment">--</span></span><br></pre></td></tr></table></figure></li>
+<li>读写分离</li>
+</ol>
+<p>主库负责写入操作，从库负责读取操作，主库发生故障不影响读操作，主库和从库通过binlog同步数据。 binlog记录数据库的变动情况，从数据库读取并执行这些log，保持和主数据库一致。主服务器和从服务器都需要配置一个唯一的ID号。此外还有主服务器的IP地址、端口、用于主从同步的账户密码、主服务器状态等。</p>
+<p>主从同步方式：</p>
+<ul>
+<li>半复制同步：写请求到达主库后，主库操作后，马上同步到从库，完成同步后再返回，会降低性能</li>
+<li>数据库中间件：增加一个中间件，读写请求都到中间件，写操作的数据都记录一个时间，然后设置一个同步时间，比如1s，该数据之后一秒之内的请求都去访问主库，无论读写，该数据一秒之后的请求，读的话去从库，写的话去主库，如果是其他数据的话，读直接去从库。</li>
+</ul>
+<ol start="14">
+<li>空节点查询问题</li>
+</ol>
+<p>对于数据库中不存在的记录，当我们去查询时，经过前面的多级缓存和遍历，最后却发现根本不存在这个数据，这个操作十分耗费资源，简单方法是保留一个表在内存中，先确定库中有再进行查询。</p>
+<p>15. </p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"># 面试</a>
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/05/15/Java%E5%AD%A6%E4%B9%A0-%E6%B3%A8%E8%A7%A3%E4%B8%8E%E5%8F%8D%E5%B0%84/" rel="next" title="Java学习(五)-注解与反射">
+                <i class="fa fa-chevron-left"></i> Java学习(五)-注解与反射
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/05/31/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%91%E7%B3%BB%E5%88%97/" rel="prev" title="数据结构之树">
+                数据结构之树 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="IronQin" />
+            
+              <p class="site-author-name" itemprop="name">IronQin</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/qwbjtu2015" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:qwbjtu15@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#decimal"><span class="nav-number">1.</span> <span class="nav-text">decimal</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">IronQin</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'A4xJ0gMfTQNSOhBKBVAPYmJ4-gzGzoHsz',
+        appKey: 'WL7KU6T9csIghQLuHXPgDKNo',
+        placeholder: '有什么想说的~',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
