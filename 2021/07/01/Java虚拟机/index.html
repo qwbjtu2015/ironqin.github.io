@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="IronQin&#39;s Blog">
 <meta property="og:description" content="总结Java虚拟机中的常见知识点">
 <meta property="article:published_time" content="2021-07-01T14:22:00.000Z">
-<meta property="article:modified_time" content="2021-07-01T14:28:13.466Z">
+<meta property="article:modified_time" content="2021-07-06T13:44:38.152Z">
 <meta property="article:author" content="IronQin">
 <meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
@@ -343,7 +343,52 @@
       
 
       
-        <h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><h2 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h2><h2 id="类加载过程"><a href="#类加载过程" class="headerlink" title="类加载过程"></a>类加载过程</h2><h2 id="JDK8-新特性"><a href="#JDK8-新特性" class="headerlink" title="JDK8 新特性"></a>JDK8 新特性</h2>
+        <h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><p>JVM的内存管理指的是Java程序运行时所使用的内存空间的管理情况。在JDK8之前，主要包括堆、栈和方法区，JDK8中方法区变成了元空间。</p>
+<p>线程私有空间（栈空间）：</p>
+<ul>
+<li>程序计数器</li>
+<li>虚拟机栈</li>
+<li>本地方法栈<br>线程共享区域</li>
+<li>堆空间</li>
+<li>方法区</li>
+<li>直接内存（不属于运行时内存）</li>
+</ul>
+<p><strong>程序计数器</strong><br>简称PC，类似于操作系统中的程序计数器，用于指示该线程执行到的字节码的行。主要作用：（1）通过改变PC指针的值从而实现流程控制，实现代码的顺序、选择、循环等各类流程（2）在线程切换后标识应该继续运行的位置。PC内存区不会出现OutOfMemoryError，它的生命周期与线程一致。</p>
+<p><strong>栈空间</strong><br>栈空间由一个个栈帧组成，每个栈帧代表了一个方法，包含了这个方法的局部变量表、操作数栈、动态链接和方法出口等信息。方法的嵌套调用意味着栈帧的入栈操作，方法执行完毕或者抛出异常，栈帧弹出。局部变量表中包括8中基本数据类型和对象引用，不包括对象本身。</p>
+<p>该区域可能出的错误</p>
+<ul>
+<li>StackOverFlowError 栈溢出，超过最大栈深度</li>
+<li>OutOfMemoryError 内存不足，虽然没有超过最大深度，但是内存大小不够了</li>
+</ul>
+<p><strong>本地方法栈</strong></p>
+<p>本地方法栈与虚拟机的栈空间非常一致，区别仅在于它是存储本地方法（Naive）的栈帧，它同样也会出现上述两种错误。</p>
+<p><strong>堆空间</strong></p>
+<p>堆内存所占的空间最大，该区域只存放对象实例，几乎所有的对象实例和数组都在这里分配内存。堆内存也是java垃圾回收器的主要工作地。</p>
+<p><strong>方法区</strong><br>方法区也是线程共享的区域，存储虚拟机已经加载的类信息、常量、静态变量、即时编译器编译后的代码等。JDK8中已经将方法区移到了直接内存中，名字也改为元空间。也就是说如果运行的Java项目类非常多，那么方法区这部分消耗的更多的是系统内存，而不是虚拟机专用内存。这样的好处是虚拟机可以加载更多的类。</p>
+<p><strong>运行时常量池</strong></p>
+<p>运行时常量池是方法区的一部分，主要存储常量池表，包括字面量和符号引用量。字面量主要是文本类的字符串和声明为final的常量等，符号引用主要包括三种类型：类和接口的全限定名、字段名称和描述符、方法名称和描述符。</p>
+<p>上面是Class文件中的常量池，运行时常量池不仅包含Class文件常量池，还包括运行期间动态产生的常量，主要是String类的intern()方法。该方法会在常量池中查找是否存在与自己相等的字符串，如果有，直接指向常量池中的位置，没有的话就把自己添加到常量池中。</p>
+<p>6中基本数据类型和他们的包装类都自动存储在常量池，不包括float和double</p>
+<p>字面量：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">String s1 = <span class="string">"string1"</span>;</span><br><span class="line">String s2 = <span class="string">"str"</span> + <span class="string">"ing1"</span>;</span><br><span class="line"><span class="keyword">final</span> String s3 = <span class="string">"string1"</span>;</span><br><span class="line">String s4 = <span class="string">"string1"</span>.intern();</span><br><span class="line"><span class="comment">// s1==s2 s1==s3 s1==s4 三个变量都指向了常量池中的同一个位置。</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">String s1 = <span class="keyword">new</span> String(<span class="string">"abc"</span>);</span><br><span class="line">String s2 = s1.intern();</span><br><span class="line">String s3 = <span class="string">"abc"</span>;</span><br><span class="line">s1==s2 <span class="comment">//false</span></span><br><span class="line">s2==s3 <span class="comment">//true</span></span><br></pre></td></tr></table></figure>
+<p>分析：第一个语句创建了两个对象，首先字符串abc会被放到常量池中，而在堆中则会存储一个String对象，它的值为abc，而s1这个对象引用则会在栈中。第二个语句s1.intern则会去常量池中查找，发现已经有abc这个常量，那么s2直接就指向常量池里的abc位置，第三个创建这个常量时发现已经存在，同样也会指向常量池中的abc位置，因此s1和s2地址不同，而s2和s3地址相同，都是常量池中的内存地址。</p>
+<p><strong>常量池的好处</strong></p>
+<ul>
+<li>节省内存空间：常量池中所有相同的字符串都指向一个位置，不会浪费</li>
+<li>节省运行时间：字符串比较时，==要比equals快，如果两个字符串是在常量池中，比较地址的结果与比较值的结果一样。</li>
+</ul>
+<p><strong>直接内存</strong><br>直接内存指的是服务器的系统内存，JVM运行时内存应当是直接内存的一部分。</p>
+<h2 id="JVM中创建对象的全过程"><a href="#JVM中创建对象的全过程" class="headerlink" title="JVM中创建对象的全过程"></a>JVM中创建对象的全过程</h2><p>（1）类加载检查</p>
+<p>（2）分配内存</p>
+<p>（3）零值初始化</p>
+<p>（4）设置对象头</p>
+<p>（5）执行init方法</p>
+<h2 id="JVM垃圾回收"><a href="#JVM垃圾回收" class="headerlink" title="JVM垃圾回收"></a>JVM垃圾回收</h2><p>JVM内存管理的几个问题：内存是如何分配的？哪些对象是需要回收的？什么情况下会回收？具体怎么回收？</p>
+<p>JVM的垃圾回收主要聚焦于堆内存，可以将该内存分为新生代和老年代两个部分，其中新生代又分为Eden区、From区（s0）、To区（s1）。</p>
+<p>一般情况下，对象创建后首先会在Eden区分配内存，在一次新生代垃圾回收后，如果对象还存活，则会进入s0或s1区，同时对象年龄加1，当它的年龄增加到预设数值后，就会进入老年代。</p>
+<h2 id="类加载过程"><a href="#类加载过程" class="headerlink" title="类加载过程"></a>类加载过程</h2><h2 id="JDK8-新特性"><a href="#JDK8-新特性" class="headerlink" title="JDK8 新特性"></a>JDK8 新特性</h2>
       
     </div>
     
@@ -382,6 +427,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/07/06/Lucene%E6%A3%80%E7%B4%A2%E5%BC%95%E6%93%8E/" rel="prev" title="Lucene检索引擎和Elasticsearch">
+                Lucene检索引擎和Elasticsearch <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -465,7 +514,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-count">30</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -478,7 +527,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
@@ -527,7 +576,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#内存管理"><span class="nav-number">1.</span> <span class="nav-text">内存管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#垃圾回收"><span class="nav-number">2.</span> <span class="nav-text">垃圾回收</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类加载过程"><span class="nav-number">3.</span> <span class="nav-text">类加载过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK8-新特性"><span class="nav-number">4.</span> <span class="nav-text">JDK8 新特性</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#内存管理"><span class="nav-number">1.</span> <span class="nav-text">内存管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM中创建对象的全过程"><span class="nav-number">2.</span> <span class="nav-text">JVM中创建对象的全过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM垃圾回收"><span class="nav-number">3.</span> <span class="nav-text">JVM垃圾回收</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类加载过程"><span class="nav-number">4.</span> <span class="nav-text">类加载过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK8-新特性"><span class="nav-number">5.</span> <span class="nav-text">JDK8 新特性</span></a></li></ol></div>
             
 
           </div>
