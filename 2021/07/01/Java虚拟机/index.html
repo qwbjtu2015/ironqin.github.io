@@ -85,11 +85,16 @@
 <meta property="og:url" content="https://qwbjtu2015.github.io/2021/07/01/Java%E8%99%9A%E6%8B%9F%E6%9C%BA/index.html">
 <meta property="og:site_name" content="IronQin&#39;s Blog">
 <meta property="og:description" content="总结Java虚拟机中的常见知识点">
+<meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/java/GC-Serial.jpg">
+<meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/java/GC-ParNew.jpg">
+<meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/java/GC-CMS.jpg">
+<meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/java/GC-G1.jpg">
 <meta property="article:published_time" content="2021-07-01T14:22:00.000Z">
-<meta property="article:modified_time" content="2021-07-06T13:44:38.152Z">
+<meta property="article:modified_time" content="2021-07-12T14:02:49.547Z">
 <meta property="article:author" content="IronQin">
 <meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://qwbjtu2015.github.io/images/posts/java/GC-Serial.jpg">
 
 
 
@@ -388,6 +393,63 @@
 <h2 id="JVM垃圾回收"><a href="#JVM垃圾回收" class="headerlink" title="JVM垃圾回收"></a>JVM垃圾回收</h2><p>JVM内存管理的几个问题：内存是如何分配的？哪些对象是需要回收的？什么情况下会回收？具体怎么回收？</p>
 <p>JVM的垃圾回收主要聚焦于堆内存，可以将该内存分为新生代和老年代两个部分，其中新生代又分为Eden区、From区（s0）、To区（s1）。</p>
 <p>一般情况下，对象创建后首先会在Eden区分配内存，在一次新生代垃圾回收后，如果对象还存活，则会进入s0或s1区，同时对象年龄加1，当它的年龄增加到预设数值后，就会进入老年代。</p>
+<p>三种垃圾回收算法</p>
+<p><strong>标记-清除算法</strong><br>标记：标记出所有不需要回收的对象，然后将其他对象全部清除。</p>
+<p><strong>标记-复制算法</strong><br>把内存分为大小一样的两块，每次使用其中一块，每当这块<strong>内存使用完</strong>后，就进行扫描，吧仍然存活的对象复制到另一半，然后把原来的空间直接清除，这样避免了内存碎片的问题。</p>
+<p><strong>标记-整理算法</strong><br>对内存空间依次扫描，把存活的对象依次向一端移动，最后将剩余的内存全部清除。避免了碎片问题。</p>
+<p><strong>分代收集算法</strong><br>这是现在虚拟机中使用的算法，根据对象存活周期的不同将内存分为几块，一般分为新生代和老年代。在新生代中，每次手机都会有大量对象死去，所以适合选择标记-复制算法，只需要付出少量对象的复制成本就能完成回收；而老年代中对象存活几率较高，而且没有额外空间分块，所以必须选择标记-清除或者标记-整理算法。</p>
+<p>这也是为什么虚拟机堆内存要分为新生代和老年代的原因，正是他们不同的特性决定了不同的垃圾回收算法。</p>
+<p>具体的垃圾收集器是上面这些算法的实现，常见的收集器有3类，共7种。</p>
+<ul>
+<li>新生代的收集器<ul>
+<li>Serial收集器</li>
+<li>ParNew收集器</li>
+<li>Parallel Scavenge收集器</li>
+</ul>
+</li>
+<li>老年代的收集器<ul>
+<li>Serial Old收集器</li>
+<li>Parallel Old收集器</li>
+<li>CMS收集器</li>
+</ul>
+</li>
+<li>整个Java堆的收集器（新生代+老年代）<ul>
+<li>G1收集器</li>
+</ul>
+</li>
+</ul>
+<p><strong>Serial收集器</strong><br>串行收集器是最基本的GC，串行意味着垃圾回收是单线程，而且该线程在工作时要暂停其他所有的工作线程，直到垃圾收集结束，该GC使用标记-复制算法。</p>
+<p><img src="/images/posts/java/GC-Serial.jpg" alt="Fig1" title="Fig1 Serial收集器"></p>
+<p><strong>ParNew收集器</strong><br>ParNew是Serial收集器的多线程版本，它是在垃圾收集时使用单线程，但仍然需要暂停其他所有工作线程。</p>
+<ul>
+<li>并行：多条垃圾收集线程并行工作，但用户线程仍然处于等待状态。</li>
+<li>并发：用户线程与垃圾回收线程同时执行，用户程序和垃圾回收程序运行在不同cpu上。</li>
+</ul>
+<p><img src="/images/posts/java/GC-ParNew.jpg" alt="Fig2" title="Fig2 ParNew收集器"></p>
+<p><strong>Parallel Scavenge收集器</strong><br>Parallel Scavenge收集器是新生代并行收集器，追求高吞吐量，高效利用 CPU。停顿时间越短就越适合需要与用户交互的程序，良好的响应速度能提升用户体验，而高吞吐量则可用高效率地利用CPU时间，尽快完成程序的运算任务，主要适合在后台运算而不需要太多交互的任务。</p>
+<p><strong>Serial Old收集器</strong><br>采用标记-整理算法，主要意义也是在于给Client模式下的虚拟机使用。</p>
+<p><strong>Parallel Old收集器</strong><br>标记整理算法。</p>
+<p><strong>CMS收集器</strong><br>CMS收集器是一种以获取最短回收停顿时间为目标的收集器，也是HotSpot虚拟机第一款真正意义上的并发收集器，它第一次实现了垃圾回收线程与用户线程的同时工作。它是一种标记-清除算法实现的。</p>
+<p>目前很大一部分的Java应用集中在互联网站或者B/S系统的服务端上，这类应用尤其重视服务器的响应速度，希望系统停顿时间最短，以给用户带来较好的体验。CMS收集器就非常符合这类应用的需求。</p>
+<p>CMS收集器四个步骤：初始标记、并发标记、重新标记、并发清除。</p>
+<p><img src="/images/posts/java/GC-CMS.jpg" alt="Fig3" title="Fig2 CMS收集器"></p>
+<p>CMS的缺点</p>
+<ul>
+<li>对CPU资源敏感</li>
+<li>无法处理浮动垃圾</li>
+<li>标记-清除算法产生大量内存碎片</li>
+</ul>
+<p><strong>G1回收器</strong></p>
+<p>JDK1.7之后全面取代CMS收集器。优点是：</p>
+<ul>
+<li>独特的分代垃圾回收器，分代GC</li>
+<li>使用分区算法，不要求eden、年轻代或老年代空间连续</li>
+<li>并行：回收期间可以有多个线程同时工作，有效利用多核cpu</li>
+<li>空间整理：回收时进行对象移动，减少碎片</li>
+<li>可预见性：可以选取部分区域进行回收，缩小回收范围，减少全局停顿</li>
+</ul>
+<p>G1回收分为几步：初始标记、并发标记、最终标记、筛选回收</p>
+<p><img src="/images/posts/java/GC-G1.jpg" alt="Fig4" title="Fig2 G1收集器"></p>
 <h2 id="类加载过程"><a href="#类加载过程" class="headerlink" title="类加载过程"></a>类加载过程</h2><h2 id="JDK8-新特性"><a href="#JDK8-新特性" class="headerlink" title="JDK8 新特性"></a>JDK8 新特性</h2>
       
     </div>
@@ -514,7 +576,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-count">31</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
