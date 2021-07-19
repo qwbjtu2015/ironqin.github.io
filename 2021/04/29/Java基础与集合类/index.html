@@ -87,7 +87,7 @@
 <meta property="og:description" content="Java基础知识复习要点">
 <meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/java/basic-exception.png">
 <meta property="article:published_time" content="2021-04-29T13:52:06.000Z">
-<meta property="article:modified_time" content="2021-07-11T08:15:48.644Z">
+<meta property="article:modified_time" content="2021-07-19T15:07:04.475Z">
 <meta property="article:author" content="IronQin">
 <meta property="article:tag" content="面试">
 <meta property="article:tag" content="Java">
@@ -428,6 +428,43 @@
 <li>InvalidClassException：反序列化时读取到的对象的类结构如果发生了变化，那么就会抛出InvalidClassException。Java对两个类结构判断的通过serialVersionUID来判断，如果我们想忽略类的修改造成的该异常，可以在类定义中添加该变量，必须是static和final修饰的long类型<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;</span><br></pre></td></tr></table></figure></li>
 <li>打印流：System.out.println()其中的out就是打印流PrintStream的对象，PrintStream继承自OutputStream字节输出流。实现了print、println、printArray等方法，同时永远不会抛出IOException，可以打印任意类型的值</li>
 </ol>
+<h2 id="HashMap总结"><a href="#HashMap总结" class="headerlink" title="HashMap总结"></a>HashMap总结</h2><ul>
+<li>内部数据结构是：数组+链表/红黑树</li>
+<li>HashMap允许一个key为null,允许多个值为null</li>
+<li>影响HashMap性能的重要参数：<ul>
+<li>初始容量：创建哈希表时数组长度，默认是16</li>
+<li>负载因子：哈希表在其容量自动增加之前可以达到多满的一种尺度，默认是0.75</li>
+</ul>
+</li>
+<li>HashMap中的Put方法：计算索引值和逻辑判断-&gt;扩容-&gt;链表-&gt;红黑树<ul>
+<li>首先计算key对应的hash值（位置i），然后判断table[i]是否为空，空的话直接插入，否则判断该key是否已经存在，若已经存在，直接覆盖value，如果不存在，则判断table[i]是链表节点还是树节点，树节点的话直接插入，链表节点的话，遍历链表查看长度是否超过8，超过则转换成红黑树再插入，没有超过直接插入链表。</li>
+<li>插入完成后，hashmap的size加1，并判断map是否超过负载因子，超过则自动扩容。</li>
+<li>当链表长度大于8且HashMap的size超过64之后才会触发红黑树的转换，否则只会触发扩容。</li>
+</ul>
+</li>
+<li>HashMap中key值的hash值的计算<ul>
+<li>hash(key): 首先计算key的hashCode，设h = key.hashCode();h是一个32位二进制数字，这里并不是直接用h对长度取余，这是因为这样的话相当于只考虑了后面几位，可能会导致数据碰撞性增加，因此实际是将h的高16位与它的低16位进行异或运算，运算后的结果再去跟数组长度做低位与运算，得到最后的index，这样保证了最大程度上的数据均匀分布。</li>
+</ul>
+</li>
+<li>HashMap的数组长度维和总是2的N次方：<ul>
+<li>HashMap的resize操作是通过左移/右移的位运算实现的</li>
+<li>当length=2^n时，对length的取模运算可以直接转换为与运算，即hash(key)%length = hash(key)&amp;(length-1)。 位运算是直接对内存数据进行操作，不需要转成十进制，所以比取模运算效率更高。</li>
+<li>正是因为length-1的二进制表示是全1，所以hash值和它进行与运算的结果分布更加均匀，减少了碰撞</li>
+</ul>
+</li>
+<li>JDK1.8中的优化<ul>
+<li>数组+链表的结构改成了数组+链表/红黑树的结构，当链表长度超过8时自动转为红黑树【原因是当链表过长时其查询性能太差O（N），改成红黑树以后性能变成了O（logN）】</li>
+<li>链表的插入方式从头插法改成了尾插法（之前头插的原因是认为最近插入的数据被访问的可能性更大，而且这种插入更快，改成尾插的原因是头插法在resize时可能会出现环形链，而改为尾插时，节点顺序没有变化，不会发生环形链，但这并不意味着HashMap可以用于多线程）</li>
+<li>在扩容时，JDK1.7需要对原数组中的元素重新hash定位位置，而1.8则采用更简单的判断逻辑(注：因为index计算是通过与运算，而长度从16变为32仅仅是和1111变成11111与运算，区别在于hash值的首位是0还是1，如果是0，那么结果没变，不需要移动，如果是1，位置正好增加了16，也就是原来的size，这样只需要移动一部分数据即可)</li>
+<li>JDK1.7是插入前判断是否需要扩容，而JDK1.8是插入后再判断</li>
+</ul>
+</li>
+<li>HashMap线程安全方面的问题<ul>
+<li>JDK1.7中，多线程环境下扩容操作会造成环形链或数据丢失。</li>
+<li>JDK1.8中，在多线程环境下会发生数据覆盖</li>
+</ul>
+</li>
+</ul>
 
       
     </div>
@@ -618,7 +655,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-基础部分"><span class="nav-number">1.</span> <span class="nav-text">1 基础部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-集合类与IO"><span class="nav-number">2.</span> <span class="nav-text">2 集合类与IO</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-基础部分"><span class="nav-number">1.</span> <span class="nav-text">1 基础部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-集合类与IO"><span class="nav-number">2.</span> <span class="nav-text">2 集合类与IO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HashMap总结"><span class="nav-number">3.</span> <span class="nav-text">HashMap总结</span></a></li></ol></div>
             
 
           </div>
