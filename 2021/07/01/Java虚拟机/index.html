@@ -90,7 +90,7 @@
 <meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/java/GC-CMS.jpg">
 <meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/java/GC-G1.jpg">
 <meta property="article:published_time" content="2021-07-01T14:22:00.000Z">
-<meta property="article:modified_time" content="2021-07-12T14:02:49.547Z">
+<meta property="article:modified_time" content="2021-07-22T14:17:46.477Z">
 <meta property="article:author" content="IronQin">
 <meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
@@ -450,7 +450,74 @@
 </ul>
 <p>G1回收分为几步：初始标记、并发标记、最终标记、筛选回收</p>
 <p><img src="/images/posts/java/GC-G1.jpg" alt="Fig4" title="Fig2 G1收集器"></p>
-<h2 id="类加载过程"><a href="#类加载过程" class="headerlink" title="类加载过程"></a>类加载过程</h2><h2 id="JDK8-新特性"><a href="#JDK8-新特性" class="headerlink" title="JDK8 新特性"></a>JDK8 新特性</h2>
+<h2 id="如何判断对象已经死亡"><a href="#如何判断对象已经死亡" class="headerlink" title="如何判断对象已经死亡"></a>如何判断对象已经死亡</h2><h3 id="引用计数法"><a href="#引用计数法" class="headerlink" title="引用计数法"></a>引用计数法</h3><p>记录每个对象被引用的次数，如果计数器为0，则表示已经死亡，但是这个方法基本没有被使用，因为很难解决对象相互循环引用。</p>
+<h3 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h3><p>通过一棵树遍历该树上的所有对象，没有被访问到的就是死亡对象。这棵树的根节点成称为GC Roots，包括以下几种：</p>
+<ul>
+<li>虚拟机栈中引用的对象</li>
+<li>本地方法栈中引用的对象</li>
+<li>类静态属性引用的对象</li>
+<li>方法区中常量引用的对象</li>
+<li>所有被同步锁持有的对象</li>
+</ul>
+<p>通过树去查找节点时，节点之间的关系时引用关系，也就是按照引用链进行查找，那么Java中的引用又有哪几类呢？</p>
+<h3 id="四种引用"><a href="#四种引用" class="headerlink" title="四种引用"></a>四种引用</h3><p>按照引用从强到弱的顺序，可以分为</p>
+<ul>
+<li>强引用：大部分常见的引用，比如a.c = b;强引用一定不会被回收，即使内存不足报出OutOfMemoryError也不回收这一类引用。</li>
+<li>软引用：可有可无，内存空间足够就不回收，内存空间不足了就回收</li>
+<li>弱引用：可有可无，不管内存是否足够，只要发现就会回收，但是有时候并不会发现，这是因为垃圾回收的线程优先级低</li>
+<li>虚引用：形同虚设，和没有任何引用一样，在任何时候都有可能被回收。【虚引用主要用来跟踪对象被垃圾回收的活动】</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 强引用</span></span><br><span class="line">Object obj1 = <span class="keyword">new</span> Object();</span><br><span class="line">Object obj2 = obj1;</span><br><span class="line">obj1 = <span class="keyword">null</span>;</span><br><span class="line">System.gc();</span><br><span class="line"><span class="comment">// obj1引用的对象不会被释放，因为obj2是强引用，还在指向这个对象</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 软引用</span></span><br><span class="line">Object obj1 = <span class="keyword">new</span> Object();</span><br><span class="line">SoftReference softRefer = <span class="keyword">new</span> SoftReference&lt;&gt;(obj1);</span><br><span class="line">obj1 = <span class="keyword">null</span>;</span><br><span class="line">System.gc();</span><br><span class="line"><span class="comment">// 当内存充足时不会释放，当内存不足时obj1指向的对象会被清除，obj2也成为null</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 弱引用</span></span><br><span class="line">Object obj1 = <span class="keyword">new</span> Object();</span><br><span class="line">WeakReference softRefer = <span class="keyword">new</span> WeakReference&lt;&gt;(obj1);</span><br><span class="line">obj1 = <span class="keyword">null</span>;</span><br><span class="line">System.gc();</span><br><span class="line"><span class="comment">// 弱引用只要发生回收动作就会将对象回收</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 虚引用</span></span><br></pre></td></tr></table></figure>
+<p>软引用的场景：当需要读取大量本地数据时，每次从硬盘读会比较慢，全放在内存里可能占用空间太多，这时候就用软引用。HashMap&lt;String, SoftReference&gt; imageCache;</p>
+<h3 id="不可达对象回收过程"><a href="#不可达对象回收过程" class="headerlink" title="不可达对象回收过程"></a>不可达对象回收过程</h3><p>彻底回收一个对象要经历两次标记过程，当对象不可达时会被第一次标记，并进行筛选，筛选条件是该对象是否要必要执行finalize方法。当这个对象没有覆盖finalize方法或者finalize已经被虚拟机调用过时，会被视为没有必要执行。当被判断定为需要执行的对象会在一个队列中进行第二次标记，如果没有任何对象关联，就会直接回收。而被判定为不需要执行finalize方法的对象会被直接回收</p>
+<h3 id="如何判断废弃常量"><a href="#如何判断废弃常量" class="headerlink" title="如何判断废弃常量"></a>如何判断废弃常量</h3><h2 id="类加载过程"><a href="#类加载过程" class="headerlink" title="类加载过程"></a>类加载过程</h2><h2 id="JDK8-新特性"><a href="#JDK8-新特性" class="headerlink" title="JDK8 新特性"></a>JDK8 新特性</h2><h2 id="JAVA锁"><a href="#JAVA锁" class="headerlink" title="JAVA锁"></a>JAVA锁</h2><h3 id="锁分类"><a href="#锁分类" class="headerlink" title="锁分类"></a>锁分类</h3><p><strong>乐观锁/悲观锁</strong>【是一种思想，不局限于具体编程语言或数据库】</p>
+<p>悲观：凡访问必加锁； 乐观：不加锁，更新不成功再重来</p>
+<p><strong>公平锁/非公平锁</strong>【根据线程获取锁的抢占机制】</p>
+<p>公平：按照线程申请顺序发锁 非公平：不一定按顺序，可能有优先级</p>
+<p><strong>独占锁/共享锁</strong>【根据一个锁能否同时被多个线程读取】</p>
+<p>独占：任何时候只能有一个线程执行资源操作</p>
+<p>共享：可以被多个线程读取，但是只能被一个修改</p>
+<p><strong>可重入锁</strong></p>
+<p>当一个线程获得了该锁之后，可以无限次的进入该锁锁住的代码</p>
+<p><strong>自旋锁</strong></p>
+<p>当线程申请锁失败之后不会阻塞，而是尝试循环获取锁</p>
+<p><strong>CAS</strong></p>
+<p>Compare And Swap：比较并交换</p>
+<h3 id="锁实现"><a href="#锁实现" class="headerlink" title="锁实现"></a>锁实现</h3><p>相关题目</p>
+<ol>
+<li>synchronized是哪种锁的实现？为什么</li>
+</ol>
+<p>悲观锁，被他修饰的代码块，因为每次执行都会加锁</p>
+<ol start="2">
+<li>synchronized使用的是公平锁or非公平锁</li>
+</ol>
+<p>非公平锁，而且不可修改。原因是吞吐量较大，这也是主流操作系统线程调度的基本选择</p>
+<ol start="3">
+<li>new ReentrantLock()创建的是公平锁or非公平锁</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ReentrantLock myLock1 = <span class="keyword">new</span> ReentrantLock(<span class="keyword">false</span>); <span class="comment">// 默认，非公平锁</span></span><br><span class="line">ReentrantLock myLock2 = <span class="keyword">new</span> ReentrantLock(<span class="keyword">true</span>); <span class="comment">// 公平锁</span></span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>非公平锁吞吐量大于公平锁，为什么</li>
+</ol>
+<p>比如A占用锁的时候，B请求获取锁，发现被A占用之后，堵塞等待被唤醒，过了段时间C来获取A占用的锁，假如此时A恰好释放锁，如果是公平锁C后来者需要排在B之后等待被唤醒，而非公平锁则可以让C先用，在B被唤醒之前C已经使用完成，从而节省了C等待和唤醒之间的性能消耗，这就是非公平锁比公平锁吞吐量大的原因。但是当C来申请时，A还在使用，没有释放锁时，C还是要按顺序排队的。</p>
+<ol start="5">
+<li>volatile作用是什么</li>
+</ol>
+<ol start="6">
+<li>volatile与synchronized的区别</li>
+</ol>
+<p>vol只能保证可见性，不能保证原子性；syn既可以又可以</p>
+<ol start="7">
+<li>CAS是如何实现的</li>
+</ol>
+<p>CAS是乐观锁的实现；CAS会产生ABA问题（虽然前后两次对象的值一样，但是版本已经发生了变化），解决方案是加上版本号</p>
+<ol start="8">
+<li>CAS会产生什么问题，怎么解决</li>
+</ol>
+<p>（1）ABA问题<br>（2）只能保证单个变量操作的原子性<br>（3）竞争激烈场景下重试频繁，开销太大</p>
+<p>java.util.concurrent.atomic包下面的原子操作类都是基于CAS实现的。</p>
+
       
     </div>
     
@@ -576,7 +643,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-count">33</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -638,7 +705,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#内存管理"><span class="nav-number">1.</span> <span class="nav-text">内存管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM中创建对象的全过程"><span class="nav-number">2.</span> <span class="nav-text">JVM中创建对象的全过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM垃圾回收"><span class="nav-number">3.</span> <span class="nav-text">JVM垃圾回收</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类加载过程"><span class="nav-number">4.</span> <span class="nav-text">类加载过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK8-新特性"><span class="nav-number">5.</span> <span class="nav-text">JDK8 新特性</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#内存管理"><span class="nav-number">1.</span> <span class="nav-text">内存管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM中创建对象的全过程"><span class="nav-number">2.</span> <span class="nav-text">JVM中创建对象的全过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM垃圾回收"><span class="nav-number">3.</span> <span class="nav-text">JVM垃圾回收</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何判断对象已经死亡"><span class="nav-number">4.</span> <span class="nav-text">如何判断对象已经死亡</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#引用计数法"><span class="nav-number">4.1.</span> <span class="nav-text">引用计数法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#可达性分析算法"><span class="nav-number">4.2.</span> <span class="nav-text">可达性分析算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四种引用"><span class="nav-number">4.3.</span> <span class="nav-text">四种引用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不可达对象回收过程"><span class="nav-number">4.4.</span> <span class="nav-text">不可达对象回收过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何判断废弃常量"><span class="nav-number">4.5.</span> <span class="nav-text">如何判断废弃常量</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类加载过程"><span class="nav-number">5.</span> <span class="nav-text">类加载过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK8-新特性"><span class="nav-number">6.</span> <span class="nav-text">JDK8 新特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JAVA锁"><span class="nav-number">7.</span> <span class="nav-text">JAVA锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#锁分类"><span class="nav-number">7.1.</span> <span class="nav-text">锁分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#锁实现"><span class="nav-number">7.2.</span> <span class="nav-text">锁实现</span></a></li></ol></li></ol></div>
             
 
           </div>
