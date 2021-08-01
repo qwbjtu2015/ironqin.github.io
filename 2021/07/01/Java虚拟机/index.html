@@ -85,16 +85,18 @@
 <meta property="og:url" content="https://qwbjtu2015.github.io/2021/07/01/Java%E8%99%9A%E6%8B%9F%E6%9C%BA/index.html">
 <meta property="og:site_name" content="IronQin&#39;s Blog">
 <meta property="og:description" content="总结Java虚拟机中的常见知识点">
+<meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/java/jvm-memory-pre.png">
+<meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/java/jvm-memory-now.jpg">
 <meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/java/GC-Serial.jpg">
 <meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/java/GC-ParNew.jpg">
 <meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/java/GC-CMS.jpg">
 <meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/java/GC-G1.jpg">
 <meta property="article:published_time" content="2021-07-01T14:22:00.000Z">
-<meta property="article:modified_time" content="2021-07-22T14:17:46.477Z">
+<meta property="article:modified_time" content="2021-07-28T15:02:47.204Z">
 <meta property="article:author" content="IronQin">
 <meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://qwbjtu2015.github.io/images/posts/java/GC-Serial.jpg">
+<meta name="twitter:image" content="https://qwbjtu2015.github.io/images/posts/java/jvm-memory-pre.png">
 
 
 
@@ -349,11 +351,16 @@
 
       
         <h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><p>JVM的内存管理指的是Java程序运行时所使用的内存空间的管理情况。在JDK8之前，主要包括堆、栈和方法区，JDK8中方法区变成了元空间。</p>
+<p><img src="/images/posts/java/jvm-memory-pre.png" alt="Fig1" title="JVM内存区域划分"></p>
+<p><img src="/images/posts/java/jvm-memory-now.jpg" alt="Fig2" title="JVM内存区域划分"></p>
 <p>线程私有空间（栈空间）：</p>
 <ul>
 <li>程序计数器</li>
 <li>虚拟机栈</li>
-<li>本地方法栈<br>线程共享区域</li>
+<li>本地方法栈</li>
+</ul>
+<p>线程共享区域</p>
+<ul>
 <li>堆空间</li>
 <li>方法区</li>
 <li>直接内存（不属于运行时内存）</li>
@@ -418,21 +425,21 @@
 </ul>
 </li>
 </ul>
-<p><strong>Serial收集器</strong><br>串行收集器是最基本的GC，串行意味着垃圾回收是单线程，而且该线程在工作时要暂停其他所有的工作线程，直到垃圾收集结束，该GC使用标记-复制算法。</p>
-<p><img src="/images/posts/java/GC-Serial.jpg" alt="Fig1" title="Fig1 Serial收集器"></p>
-<p><strong>ParNew收集器</strong><br>ParNew是Serial收集器的多线程版本，它是在垃圾收集时使用单线程，但仍然需要暂停其他所有工作线程。</p>
+<p><strong>Serial收集器</strong><br>串行收集器是最基本的GC，串行意味着垃圾回收是单线程，而且该线程在工作时要暂停其他所有的工作线程，直到垃圾收集结束，该GC使用标记-复制算法。【stop the world】</p>
+<p><img src="/images/posts/java/GC-Serial.jpg" alt="Fig3" title="Fig3 Serial收集器"></p>
+<p><strong>ParNew收集器</strong><br>ParNew是Serial收集器的多线程版本，它是在垃圾收集时使用多线程，但仍然需要暂停其他所有工作线程。【stop the world】</p>
 <ul>
 <li>并行：多条垃圾收集线程并行工作，但用户线程仍然处于等待状态。</li>
 <li>并发：用户线程与垃圾回收线程同时执行，用户程序和垃圾回收程序运行在不同cpu上。</li>
 </ul>
-<p><img src="/images/posts/java/GC-ParNew.jpg" alt="Fig2" title="Fig2 ParNew收集器"></p>
+<p><img src="/images/posts/java/GC-ParNew.jpg" alt="Fig4" title="Fig4 ParNew收集器"></p>
 <p><strong>Parallel Scavenge收集器</strong><br>Parallel Scavenge收集器是新生代并行收集器，追求高吞吐量，高效利用 CPU。停顿时间越短就越适合需要与用户交互的程序，良好的响应速度能提升用户体验，而高吞吐量则可用高效率地利用CPU时间，尽快完成程序的运算任务，主要适合在后台运算而不需要太多交互的任务。</p>
 <p><strong>Serial Old收集器</strong><br>采用标记-整理算法，主要意义也是在于给Client模式下的虚拟机使用。</p>
 <p><strong>Parallel Old收集器</strong><br>标记整理算法。</p>
 <p><strong>CMS收集器</strong><br>CMS收集器是一种以获取最短回收停顿时间为目标的收集器，也是HotSpot虚拟机第一款真正意义上的并发收集器，它第一次实现了垃圾回收线程与用户线程的同时工作。它是一种标记-清除算法实现的。</p>
 <p>目前很大一部分的Java应用集中在互联网站或者B/S系统的服务端上，这类应用尤其重视服务器的响应速度，希望系统停顿时间最短，以给用户带来较好的体验。CMS收集器就非常符合这类应用的需求。</p>
 <p>CMS收集器四个步骤：初始标记、并发标记、重新标记、并发清除。</p>
-<p><img src="/images/posts/java/GC-CMS.jpg" alt="Fig3" title="Fig2 CMS收集器"></p>
+<p><img src="/images/posts/java/GC-CMS.jpg" alt="Fig5" title="Fig5 CMS收集器"></p>
 <p>CMS的缺点</p>
 <ul>
 <li>对CPU资源敏感</li>
@@ -449,7 +456,16 @@
 <li>可预见性：可以选取部分区域进行回收，缩小回收范围，减少全局停顿</li>
 </ul>
 <p>G1回收分为几步：初始标记、并发标记、最终标记、筛选回收</p>
-<p><img src="/images/posts/java/GC-G1.jpg" alt="Fig4" title="Fig2 G1收集器"></p>
+<p><img src="/images/posts/java/GC-G1.jpg" alt="Fig6" title="Fig6 G1收集器"></p>
+<p>Minor GC：只回收新生代的空间<br>full GC: 回收整个堆空间，包括新生代、老年代、永久代（JDK1.8后被移除，改为元空间）</p>
+<p>由于full GC相对Minor GC来讲，停止用户线程的时间较长，至少慢10倍以上，所以应当尽量避免，Full GC产生的原因有</p>
+<ul>
+<li>System.gc()调用：程序中手动调用该方法会增加JVM进行Full GC的概率</li>
+<li>老年代空间不足： 老年代没有空间存放新的对象，就会触发Full GC</li>
+<li>老年代连续空间不足</li>
+<li>元空间内存达到阈值：元数据空间使用的是本地内存，主要与设置的参数有关</li>
+<li>堆中产生大对象超过阈值</li>
+</ul>
 <h2 id="如何判断对象已经死亡"><a href="#如何判断对象已经死亡" class="headerlink" title="如何判断对象已经死亡"></a>如何判断对象已经死亡</h2><h3 id="引用计数法"><a href="#引用计数法" class="headerlink" title="引用计数法"></a>引用计数法</h3><p>记录每个对象被引用的次数，如果计数器为0，则表示已经死亡，但是这个方法基本没有被使用，因为很难解决对象相互循环引用。</p>
 <h3 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h3><p>通过一棵树遍历该树上的所有对象，没有被访问到的就是死亡对象。这棵树的根节点成称为GC Roots，包括以下几种：</p>
 <ul>
@@ -643,7 +659,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-count">34</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

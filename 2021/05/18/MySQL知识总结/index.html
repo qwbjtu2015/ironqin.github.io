@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="IronQin&#39;s Blog">
 <meta property="og:description" content="MySQL数据库">
 <meta property="article:published_time" content="2021-05-18T14:06:06.000Z">
-<meta property="article:modified_time" content="2021-07-20T12:56:41.730Z">
+<meta property="article:modified_time" content="2021-07-24T12:59:35.241Z">
 <meta property="article:author" content="IronQin">
 <meta property="article:tag" content="面试">
 <meta property="article:tag" content="Java">
@@ -292,7 +292,7 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-05-18T22:06:06+08:00">
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-05-18T06:06:06-08:00">
                 2021-05-18
               </time>
             
@@ -465,7 +465,156 @@
 <li>空节点查询问题</li>
 </ol>
 <p>对于数据库中不存在的记录，当我们去查询时，经过前面的多级缓存和遍历，最后却发现根本不存在这个数据，这个操作十分耗费资源，简单方法是保留一个表在内存中，先确定库中有再进行查询。</p>
-<p>15. </p>
+<ol start="15">
+<li>存储引擎</li>
+</ol>
+<p>MyISAM和InnoDB两种存储引擎都使用B+树作为索引结果，不同的是：MyISAM的B+树叶节点上存储的是数据记录的地址，而InnoDB的节点上直接存储的数据，key是表的主键。所以InnoDB是聚簇索引，而MyISAM是非聚簇索引，而且InnoDB的数据表必须有主键，如果没有显式声明，数据库会自动生成一个长整型字段作为主键。</p>
+<ol start="16">
+<li>SQL优化</li>
+</ol>
+<p>通过EXPLAIN语句查看执行计划</p>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>执行序号，越小越早执行</td>
+</tr>
+<tr>
+<td>select_type</td>
+<td>查询类型（详情见下）</td>
+</tr>
+<tr>
+<td>table</td>
+<td>被操作的对象名称，通常是表名或别名</td>
+</tr>
+<tr>
+<td>partitions</td>
+<td>匹配的分区信息</td>
+</tr>
+<tr>
+<td>type</td>
+<td>join类型</td>
+</tr>
+<tr>
+<td>possible_keys</td>
+<td>列出可能会用到的索引</td>
+</tr>
+<tr>
+<td>key</td>
+<td>实际用到的索引</td>
+</tr>
+<tr>
+<td>key_len</td>
+<td>用到的索引键的平均长度（字节）</td>
+</tr>
+<tr>
+<td>ref</td>
+<td>与索引做比较的列</td>
+</tr>
+<tr>
+<td>rows</td>
+<td>估计每次需要扫描的行数</td>
+</tr>
+<tr>
+<td>filtered</td>
+<td>百分比信息，不重要</td>
+</tr>
+<tr>
+<td>Extra</td>
+<td>额外信息</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>查询类型参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Simple</td>
+<td>简单查询，不含union或子查询</td>
+</tr>
+<tr>
+<td>primary</td>
+<td>最外层的查询</td>
+</tr>
+<tr>
+<td>union</td>
+<td>UNION中第二个或之后的SELECT语句</td>
+</tr>
+<tr>
+<td>dependent union</td>
+<td>UNION中第二个或之后的SELECT语句取决于外面的查询</td>
+</tr>
+<tr>
+<td>union result</td>
+<td>UNION的结果</td>
+</tr>
+<tr>
+<td>subquery</td>
+<td>子查询中的第一个SELECT</td>
+</tr>
+<tr>
+<td>dependent subquery</td>
+<td>子查询中的第一个SELECT, 取决于外面的查询</td>
+</tr>
+<tr>
+<td>derived</td>
+<td>衍生表(FROM子句中的子查询)</td>
+</tr>
+<tr>
+<td>materizlized</td>
+<td>物化子查询</td>
+</tr>
+<tr>
+<td>uncacheable subquery</td>
+<td>结果集无法缓存的子查询，必须重新评估外部查询的每一行</td>
+</tr>
+<tr>
+<td>uncacheable union</td>
+<td>UNION中第二个或之后的SELECT，属于无法缓存的子查询</td>
+</tr>
+</tbody></table>
+<p>type字段：显示查询使用了什么类型，从最好到最差的连接类型依次是system、const、eq_ref、ref、fulltext、ref_or_null、index_merge、unique_subquery、index_subquery、range、index、all</p>
+<p><strong>profile的意义和使用场景</strong></p>
+<p>Profile用来分析sql性能的消耗分布情况，当用explain无法解决慢SQL的时候，需要用profile来对sql进行更细致的分析，找出SQL所花的时间大部分消耗在哪个部分，确认SQL的性能瓶颈。</p>
+<p><strong>explain中的索引问题</strong></p>
+<p>explain结果中，一般来讲，尽量用索引（tyoe为const、ref等，或者key列有值），避免使用全表扫描（type是ALL）。比如说由where条件且选择性比较好的列，需要建立索引。</p>
+<p>被驱动表的连接列也需要建立索引。被驱动表的连接列也可能会跟where条件列一起建立联合索引。当有排序或者group by的需求时，也可以考虑建立索引来达到直接排序和汇总的需求。</p>
+<ol start="17">
+<li>最左前缀原理及优化</li>
+</ol>
+<p><strong>联合索引</strong>：联合索引指的是使用多个列的组合做索引，以联合索引&lt;emp_no, title, from_date&gt;为例，第一种情况：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> employees.titles <span class="keyword">WHERE</span> emp_no=<span class="string">'10001'</span> <span class="keyword">AND</span> title=<span class="string">'Senior Engineer'</span> <span class="keyword">AND</span> from_date=<span class="string">'1986-06-26'</span>;</span><br><span class="line">+<span class="comment">----+-------------+--------+-------+---------------+---------+---------+-------------------+------+-------+</span></span><br><span class="line">| id | select_type | table  | type  | possible_keys | key     | key_len | ref               | rows | Extra |</span><br><span class="line">+<span class="comment">----+-------------+--------+-------+---------------+---------+---------+-------------------+------+-------+</span></span><br><span class="line">|  1 | SIMPLE      | titles | const | PRIMARY       | PRIMARY | 59      | const,const,const |    1 |       |</span><br><span class="line">+<span class="comment">----+-------------+--------+-------+---------------+---------+---------+-------------------+------+-------+</span></span><br></pre></td></tr></table></figure>
+<p>这里恰好用到了三个列，而且都是精确匹配（=或IN或between…and），理论上顺序最好按照emp_no/title/from_date，但是where可以自动调整以适应索引。</p>
+<p>第二种情况：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> employees.titles <span class="keyword">WHERE</span> emp_no=<span class="string">'10001'</span>;</span><br><span class="line">+<span class="comment">----+-------------+--------+------+---------------+---------+---------+-------+------+-------+</span></span><br><span class="line">| id | select_type | table  | type | possible_keys | key     | key_len | ref   | rows | Extra |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+---------------+---------+---------+-------+------+-------+</span></span><br><span class="line">|  1 | SIMPLE      | titles | ref  | PRIMARY       | PRIMARY | 4       | const |    1 |       |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+---------------+---------+---------+-------+------+-------+</span></span><br></pre></td></tr></table></figure>
+<p>这个因为只有emp_no，所以只会用到部分的索引，也就是最左前缀索引</p>
+<p>第三种：只用到第一列和第三列</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> employees.titles <span class="keyword">WHERE</span> emp_no=<span class="string">'10001'</span> <span class="keyword">AND</span> from_date=<span class="string">'1986-06-26'</span>;</span><br><span class="line">+<span class="comment">----+-------------+--------+------+---------------+---------+---------+-------+------+-------------+</span></span><br><span class="line">| id | select_type | table  | type | possible_keys | key     | key_len | ref   | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+---------------+---------+---------+-------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | titles | ref  | PRIMARY       | PRIMARY | 4       | const |    1 | Using where |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+---------------+---------+---------+-------+------+-------------+</span></span><br></pre></td></tr></table></figure>
+<p>按照最左匹配原则，这个只能用到第一列emp_no的索引，当然这里如果有条件的话可以改进一下，比如</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> employees.titles <span class="keyword">WHERE</span> emp_no=<span class="string">'10001'</span> <span class="keyword">AND</span> title <span class="keyword">IN</span> (<span class="string">'A'</span>, <span class="string">'B'</span>, <span class="string">'C'</span>) <span class="keyword">AND</span> from_date=<span class="string">'1986-06-26'</span>;</span><br><span class="line">+<span class="comment">----+-------------+--------+-------+---------------+---------+---------+------+------+-------------+</span></span><br><span class="line">| id | select_type | table  | type  | possible_keys | key     | key_len | ref  | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+--------+-------+---------------+---------+---------+------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | titles | range | PRIMARY       | PRIMARY | 59      | NULL |    7 | Using where |</span><br><span class="line">+<span class="comment">----+-------------+--------+-------+---------------+---------+---------+------+------+-------------+</span></span><br></pre></td></tr></table></figure>
+<p>如果title的可选值只有ABC三个的话，那么上面这样改进之后就可以用到emp_no/title/from_date这个完整的联合索引了。</p>
+<p>第四种情况：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> employees.titles <span class="keyword">WHERE</span> from_date=<span class="string">'1986-06-26'</span>;</span><br><span class="line">+<span class="comment">----+-------------+--------+------+---------------+------+---------+------+--------+-------------+</span></span><br><span class="line">| id | select_type | table  | type | possible_keys | key  | key_len | ref  | rows   | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+---------------+------+---------+------+--------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | titles | ALL  | NULL          | NULL | NULL    | NULL | 443308 | Using where |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+---------------+------+---------+------+--------+-------------+</span></span><br></pre></td></tr></table></figure>
+<p>如果像这样只用到了第二列或者第三列，那么按照最左匹配原则，完全不会使用到索引</p>
+<p>第五种情况：范围查询</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> employees.titles <span class="keyword">WHERE</span> emp_no &lt; <span class="string">'10010'</span> <span class="keyword">and</span> title=<span class="string">'Senior Engineer'</span>;</span><br><span class="line">+<span class="comment">----+-------------+--------+-------+---------------+---------+---------+------+------+-------------+</span></span><br><span class="line">| id | select_type | table  | type  | possible_keys | key     | key_len | ref  | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+--------+-------+---------------+---------+---------+------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | titles | range | PRIMARY       | PRIMARY | 4       | NULL |   16 | Using where |</span><br><span class="line">+<span class="comment">----+-------------+--------+-------+---------------+---------+---------+------+------+-------------+</span></span><br></pre></td></tr></table></figure>
+<p>范围查找可以用到索引，但是范围列后面的列无法使用任何索引，而且最多用于一个范围列，像上面这种情况，只会用到联合索引的一部分，也就是emp_no列。</p>
+<p>第六种情况：某列使用了函数，则不能再使用索引</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> employees.titles <span class="keyword">WHERE</span> emp_no=<span class="string">'10001'</span> <span class="keyword">AND</span> <span class="keyword">left</span>(title, <span class="number">6</span>)=<span class="string">'Senior'</span>;</span><br><span class="line">+<span class="comment">----+-------------+--------+------+---------------+---------+---------+-------+------+-------------+</span></span><br><span class="line">| id | select_type | table  | type | possible_keys | key     | key_len | ref   | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+---------------+---------+---------+-------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | titles | ref  | PRIMARY       | PRIMARY | 4       | const |    1 | Using where |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+---------------+---------+---------+-------+------+-------------+</span></span><br></pre></td></tr></table></figure>
+
+<p>建索引要选择选择性高的列，选择性的计算公式很简单，就是count(distinct(col))/count(**)</p>
+<p>Profiles使用例子</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> <span class="keyword">PROFILES</span>;</span><br><span class="line">+<span class="comment">----------+------------+-------------------------------------------------------------------------------+</span></span><br><span class="line">| Query_ID | Duration   | Query                                                                         |</span><br><span class="line">+<span class="comment">----------+------------+-------------------------------------------------------------------------------+</span></span><br><span class="line">|       10 | 0.00058000 | <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> employees.titles <span class="keyword">WHERE</span> emp_no=<span class="string">'10001'</span> <span class="keyword">AND</span> from_date=<span class="string">'1986-06-26'</span>|</span><br><span class="line">|       <span class="number">11</span> | <span class="number">0.00052500</span> | <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> employees.titles <span class="keyword">WHERE</span> emp_no=<span class="string">'10001'</span> <span class="keyword">AND</span> title <span class="keyword">IN</span> ...          |</span><br><span class="line">+<span class="comment">----------+------------+-------------------------------------------------------------------------------+</span></span><br></pre></td></tr></table></figure>
+
+<p>18. </p>
 
       
     </div>
@@ -594,7 +743,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-count">34</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
