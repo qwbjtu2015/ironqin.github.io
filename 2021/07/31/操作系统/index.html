@@ -87,7 +87,7 @@
 <meta property="og:description" content="操作系统知识梳理">
 <meta property="og:image" content="https://qwbjtu2015.github.io/images/posts/os/os-structure.png">
 <meta property="article:published_time" content="2021-07-31T13:53:00.000Z">
-<meta property="article:modified_time" content="2021-08-01T14:38:47.129Z">
+<meta property="article:modified_time" content="2021-08-02T02:45:27.852Z">
 <meta property="article:author" content="IronQin">
 <meta property="article:tag" content="面试">
 <meta name="twitter:card" content="summary">
@@ -488,7 +488,35 @@
 <li>OPT：最佳置换算法：理想状态，并不存在</li>
 </ul>
 <p>Linux系统使用的是两级LRU算法，</p>
-<h2 id="文件管理"><a href="#文件管理" class="headerlink" title="文件管理"></a>文件管理</h2><h3 id="文件逻辑结构"><a href="#文件逻辑结构" class="headerlink" title="文件逻辑结构"></a>文件逻辑结构</h3><h3 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h3><h3 id="文件共享"><a href="#文件共享" class="headerlink" title="文件共享"></a>文件共享</h3><h3 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h3><h3 id="磁盘"><a href="#磁盘" class="headerlink" title="磁盘"></a>磁盘</h3><h2 id="IO管理"><a href="#IO管理" class="headerlink" title="IO管理"></a>IO管理</h2><h3 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h3><h3 id="缓冲区"><a href="#缓冲区" class="headerlink" title="缓冲区"></a>缓冲区</h3><h3 id="设备分配"><a href="#设备分配" class="headerlink" title="设备分配"></a>设备分配</h3><h3 id="SPooling系统"><a href="#SPooling系统" class="headerlink" title="SPooling系统"></a>SPooling系统</h3>
+<h2 id="文件管理"><a href="#文件管理" class="headerlink" title="文件管理"></a>文件管理</h2><p>进程是计算机资源调度和分配的基本单位，而文件则是用户进行输入输出的基本单位。用户关心文件的命名、分类、查找、读取、写入和保存，而对于这些文件底层的具体实现则不关心。</p>
+<h3 id="文件逻辑结构"><a href="#文件逻辑结构" class="headerlink" title="文件逻辑结构"></a>文件逻辑结构</h3><p>逻辑结构指的是从用户观点出发看到的文件组织形式，物理结构是从实现观点出发，指的是文件在磁盘上的存储组织形式。</p>
+<p>按照逻辑结构，文件分为有结构文件和无结构文件两种。无结构文件直接以字节为单位顺序存储数据，没有明确的结构划分。而有结构文件类似于一张表，是有明确的结构信息的，它们可以分为以下几种:</p>
+<ul>
+<li>顺序文件：按照关键字或时间进行排列的数据文件</li>
+<li>索引文件：对于可变长记录的文件只能顺序查找，系统开销较大，为此可以建立一张索引表以加快检索速度，索引表本身是顺序文件。</li>
+<li>索引顺序表：</li>
+<li>直接文件或散列文件</li>
+</ul>
+<h3 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h3><p>文件控制块FCB，一个FCB就是一个文件目录项，主要包含以下信息：</p>
+<ul>
+<li>基本信息，如文件名、文件的物理位置、文件的逻辑结构、文件的物理结构等</li>
+<li>存取控制信息，如文件的存取权限等</li>
+<li>使用信息，如文件建立时间、修改时间</li>
+</ul>
+<h3 id="文件共享"><a href="#文件共享" class="headerlink" title="文件共享"></a>文件共享</h3><h3 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h3><h3 id="磁盘"><a href="#磁盘" class="headerlink" title="磁盘"></a>磁盘</h3><h3 id="Linux系统的文件系统"><a href="#Linux系统的文件系统" class="headerlink" title="Linux系统的文件系统"></a>Linux系统的文件系统</h3><p>在Linux操作系统中，所有被操作系统管理的资源，例如网络接口卡、磁盘驱动器、打印机、输入输出设备、普通文件或是目录都被看作是一个文件。 也就是说在Linux系统中有一个重要的概念：<strong>一切都是文件</strong>。</p>
+<p><strong>inode是linux/unix 文件系统的基础</strong>。在Linux中，文件存储在块中，一个块只能存储一个文件，一个文件可以有多个块。一个块经常为4kB，大约由8个扇区组成。</p>
+<p>文件实际被存储在块中，还有一个空间存储文件的 <strong>元信息</strong>，类似于索引的概念，存储元信息的区域叫做innode，每个文件都有一个innode，它存储的内容包括：该文件有几块、每块所在的地址、文件的拥有者、创建时间、权限、大小等等。每个innode一个唯一号码，Linux使用这个号码区分不同的文件。</p>
+<p>Linux的文件类型</p>
+<ul>
+<li>普通文件：如图片、声音、视频、txt、PDF等等</li>
+<li>目录文件：就是文件夹</li>
+<li>符号链接文件：软链接，存储的是某个文件的位置，可以指向文件夹或者文件，源文件删除后软链接也会失效</li>
+<li>字符设备：用来访问字符设备，比如硬盘</li>
+<li>设备文件：用来访问块设备，如硬盘、软盘</li>
+<li>管道文件：一种特殊类型文件，用于进程间通信</li>
+<li>套接字：进程间网络通信</li>
+</ul>
+<h2 id="IO管理"><a href="#IO管理" class="headerlink" title="IO管理"></a>IO管理</h2><h3 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h3><h3 id="缓冲区"><a href="#缓冲区" class="headerlink" title="缓冲区"></a>缓冲区</h3><h3 id="设备分配"><a href="#设备分配" class="headerlink" title="设备分配"></a>设备分配</h3><h3 id="SPooling系统"><a href="#SPooling系统" class="headerlink" title="SPooling系统"></a>SPooling系统</h3>
       
     </div>
     
@@ -518,8 +546,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2021/07/22/Java%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="next" title="Java设计模式">
-                <i class="fa fa-chevron-left"></i> Java设计模式
+              <a href="/2021/07/31/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/" rel="next" title="计算机网络基础">
+                <i class="fa fa-chevron-left"></i> 计算机网络基础
               </a>
             
           </div>
@@ -610,7 +638,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">34</span>
+                  <span class="site-state-item-count">35</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -623,7 +651,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">26</span>
+                  <span class="site-state-item-count">27</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
@@ -672,7 +700,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进程管理"><span class="nav-number">2.</span> <span class="nav-text">进程管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#进程"><span class="nav-number">2.1.</span> <span class="nav-text">进程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程"><span class="nav-number">2.2.</span> <span class="nav-text">线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU调度算法"><span class="nav-number">2.3.</span> <span class="nav-text">CPU调度算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进程同步"><span class="nav-number">2.4.</span> <span class="nav-text">进程同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁"><span class="nav-number">2.5.</span> <span class="nav-text">死锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存管理"><span class="nav-number">3.</span> <span class="nav-text">内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内存分配"><span class="nav-number">3.1.</span> <span class="nav-text">内存分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#虚拟内存"><span class="nav-number">3.2.</span> <span class="nav-text">虚拟内存</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文件管理"><span class="nav-number">4.</span> <span class="nav-text">文件管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#文件逻辑结构"><span class="nav-number">4.1.</span> <span class="nav-text">文件逻辑结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#目录结构"><span class="nav-number">4.2.</span> <span class="nav-text">目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文件共享"><span class="nav-number">4.3.</span> <span class="nav-text">文件共享</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体实现"><span class="nav-number">4.4.</span> <span class="nav-text">具体实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#磁盘"><span class="nav-number">4.5.</span> <span class="nav-text">磁盘</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IO管理"><span class="nav-number">5.</span> <span class="nav-text">IO管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述-1"><span class="nav-number">5.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓冲区"><span class="nav-number">5.2.</span> <span class="nav-text">缓冲区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设备分配"><span class="nav-number">5.3.</span> <span class="nav-text">设备分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SPooling系统"><span class="nav-number">5.4.</span> <span class="nav-text">SPooling系统</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进程管理"><span class="nav-number">2.</span> <span class="nav-text">进程管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#进程"><span class="nav-number">2.1.</span> <span class="nav-text">进程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程"><span class="nav-number">2.2.</span> <span class="nav-text">线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU调度算法"><span class="nav-number">2.3.</span> <span class="nav-text">CPU调度算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进程同步"><span class="nav-number">2.4.</span> <span class="nav-text">进程同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁"><span class="nav-number">2.5.</span> <span class="nav-text">死锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存管理"><span class="nav-number">3.</span> <span class="nav-text">内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内存分配"><span class="nav-number">3.1.</span> <span class="nav-text">内存分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#虚拟内存"><span class="nav-number">3.2.</span> <span class="nav-text">虚拟内存</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文件管理"><span class="nav-number">4.</span> <span class="nav-text">文件管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#文件逻辑结构"><span class="nav-number">4.1.</span> <span class="nav-text">文件逻辑结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#目录结构"><span class="nav-number">4.2.</span> <span class="nav-text">目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文件共享"><span class="nav-number">4.3.</span> <span class="nav-text">文件共享</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体实现"><span class="nav-number">4.4.</span> <span class="nav-text">具体实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#磁盘"><span class="nav-number">4.5.</span> <span class="nav-text">磁盘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux系统的文件系统"><span class="nav-number">4.6.</span> <span class="nav-text">Linux系统的文件系统</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IO管理"><span class="nav-number">5.</span> <span class="nav-text">IO管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述-1"><span class="nav-number">5.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓冲区"><span class="nav-number">5.2.</span> <span class="nav-text">缓冲区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设备分配"><span class="nav-number">5.3.</span> <span class="nav-text">设备分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SPooling系统"><span class="nav-number">5.4.</span> <span class="nav-text">SPooling系统</span></a></li></ol></li></ol></div>
             
 
           </div>
